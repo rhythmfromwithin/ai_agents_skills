@@ -300,8 +300,9 @@ body {
   flex-direction: column;
   gap: 4px;
   text-decoration: none;
-  transition: box-shadow .18s, border-color .18s, transform .18s;
+  transition: box-shadow .18s, border-color .18s;
   cursor: pointer;
+  position: relative;
 }
 .skill-card:hover {
   box-shadow: var(--elev-2);
@@ -328,6 +329,68 @@ body {
   font-size: 12.5px;
   color: var(--md-sys-color-on-surface-variant);
   line-height: 1.5;
+}
+.skill-expand-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 20px;
+  height: 20px;
+  color: var(--md-sys-color-on-surface-variant);
+  transition: transform .2s;
+}
+.skill-card.expanded .skill-expand-icon {
+  transform: rotate(180deg);
+}
+.skill-card.expanded {
+  border-color: var(--md-sys-color-primary);
+  box-shadow: var(--elev-2);
+}
+.skill-details {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .3s ease-out;
+  margin-top: 0;
+}
+.skill-card.expanded .skill-details {
+  max-height: 800px;
+  margin-top: 12px;
+}
+.skill-details-content {
+  padding-top: 12px;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+.skill-details-section {
+  margin-bottom: 16px;
+}
+.skill-details-section:last-child {
+  margin-bottom: 0;
+}
+.skill-details-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: 6px;
+}
+.skill-details-text {
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.skill-details-loading {
+  text-align: center;
+  padding: 20px;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 12px;
+}
+.skill-details-error {
+  text-align: center;
+  padding: 20px;
+  color: #c5221f;
+  font-size: 12px;
 }
 
 /* ── PM spotlight ─────────────────────────────────────────────────── */
@@ -1393,6 +1456,129 @@ const DATA = [
 // ─── RENDER ───────────────────────────────────────────────────────────
 let activeFilter = 'all', searchQuery = '';
 
+
+// ─── SKILL DETAILS CACHE & FETCH ──────────────────────────────────────
+const skillDetailsCache = new Map();
+
+async function fetchSkillDetails(url, skillName) {
+  if (skillDetailsCache.has(url)) {
+    return skillDetailsCache.get(url);
+  }
+
+  try {
+    // Try to fetch README or SKILL.md
+    let readmeUrl = url;
+    
+    // Handle different URL formats
+    if (url.includes('officialskills.sh')) {
+      readmeUrl = url + '/README.md';
+    } else if (url.includes('github.com') && url.includes('/tree/')) {
+      readmeUrl = url.replace('/tree/', '/raw/') + '/SKILL.md';
+    } else if (url.includes('github.com')) {
+      readmeUrl = url + '/raw/main/SKILL.md';
+    }
+
+    const response = await fetch(readmeUrl);
+    if (!response.ok) {
+      // Try alternative paths
+      if (readmeUrl.includes('/raw/main/')) {
+        readmeUrl = readmeUrl.replace('/raw/main/', '/raw/master/');
+        const altResponse = await fetch(readmeUrl);
+        if (!altResponse.ok) throw new Error('Failed to fetch');
+        const text = await altResponse.text();
+        return parseSkillMarkdown(text);
+      }
+      throw new Error('Failed to fetch');
+    }
+
+    const text = await response.text();
+    const parsed = parseSkillMarkdown(text);
+    skillDetailsCache.set(url, parsed);
+    return parsed;
+  } catch (error) {
+    return {
+      install: '无法加载安装说明',
+      usage: '无法加载使用说明',
+      summary: '无法加载简介'
+    };
+  }
+}
+
+function parseSkillMarkdown(markdown) {
+  const result = {
+    install: '',
+    usage: '',
+    summary: ''
+  };
+
+  // Extract sections using regex
+  const installMatch = markdown.match(/##\s*(Installation|安装|How to Install|如何安装)[\s\S]*?(?=##|$)/i);
+  const usageMatch = markdown.match(/##\s*(Usage|使用|How to Use|如何使用)[\s\S]*?(?=##|$)/i);
+  const summaryMatch = markdown.match(/##\s*(Summary|简介|Description|说明)[\s\S]*?(?=##|$)/i);
+
+  if (installMatch) {
+    result.install = installMatch[0].replace(/##\s*(Installation|安装|How to Install|如何安装)/i, '').trim();
+  }
+  if (usageMatch) {
+    result.usage = usageMatch[0].replace(/##\s*(Usage|使用|How to Use|如何使用)/i, '').trim();
+  }
+  if (summaryMatch) {
+    result.summary = summaryMatch[0].replace(/##\s*(Summary|简介|Description|说明)/i, '').trim();
+  }
+
+  // If no sections found, use first 500 chars as summary
+  if (!result.install && !result.usage && !result.summary) {
+    result.summary = markdown.substring(0, 500) + '...';
+  }
+
+  return result;
+}
+
+function toggleSkillDetails(card) {
+  const isExpanded = card.classList.contains('expanded');
+  
+  // Close all other cards
+  document.querySelectorAll('.skill-card.expanded').forEach(c => {
+    if (c !== card) {
+      c.classList.remove('expanded');
+    }
+  });
+
+  if (isExpanded) {
+    card.classList.remove('expanded');
+  } else {
+    card.classList.add('expanded');
+    const detailsContent = card.querySelector('.skill-details-content');
+    
+    // Check if already loaded
+    if (detailsContent.children.length === 0) {
+      detailsContent.innerHTML = '<div class="skill-details-loading">加载中...</div>';
+      
+      const url = card.dataset.url;
+      const skillName = card.dataset.skillName;
+      
+      fetchSkillDetails(url, skillName).then(details => {
+        detailsContent.innerHTML = `
+          ${details.install ? `<div class="skill-details-section">
+            <div class="skill-details-title">如何安装</div>
+            <div class="skill-details-text">${details.install}</div>
+          </div>` : ''}
+          ${details.usage ? `<div class="skill-details-section">
+            <div class="skill-details-title">如何使用</div>
+            <div class="skill-details-text">${details.usage}</div>
+          </div>` : ''}
+          ${details.summary ? `<div class="skill-details-section">
+            <div class="skill-details-title">简介</div>
+            <div class="skill-details-text">${details.summary}</div>
+          </div>` : ''}
+        `;
+      }).catch(() => {
+        detailsContent.innerHTML = '<div class="skill-details-error">无法加载详情</div>';
+      });
+    }
+  }
+}
+
 function render() {
   const q = searchQuery.toLowerCase().trim();
   const catOrder = Object.keys(CATS);
@@ -1433,12 +1619,18 @@ function render() {
 
       // Generate skill cards
       const cards = matched.map(skill => `
-        <a class="skill-card" href="${skill.url}" target="_blank" rel="noopener">
+        <div class="skill-card" data-url="${skill.url}" data-skill-name="${skill.name}">
           <div class="skill-name">
             <span class="skill-dot" style="background:${m.fg}"></span>${skill.name}
           </div>
           <div class="skill-desc">${skill.provider}</div>
-        </a>`).join('');
+          <svg class="skill-expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+          <div class="skill-details">
+            <div class="skill-details-content"></div>
+          </div>
+        </div>`).join('');
 
       catBody += `
         <div class="provider-group">
@@ -1523,6 +1715,16 @@ document.getElementById('search').addEventListener('input', e => {
 });
 
 render();
+
+
+  // Add click handlers for skill cards
+  document.getElementById('main').addEventListener('click', (e) => {
+    const card = e.target.closest('.skill-card');
+    if (card && !e.target.closest('a')) {
+      e.preventDefault();
+      toggleSkillDetails(card);
+    }
+  });
 </script>
 </body>
 </html>
