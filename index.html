@@ -3,158 +3,466 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Awesome Agent Skills — Visual Directory</title>
+<title>Awesome Agent Skills</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --pm: #6366f1; --marketing: #f59e0b; --design: #ec4899; --frontend: #06b6d4;
-    --backend: #10b981; --ai: #8b5cf6; --mobile: #f97316; --security: #ef4444;
-    --data: #14b8a6; --monitoring: #3b82f6; --payments: #22c55e; --web3: #a855f7;
-    --productivity: #64748b; --cloud: #0ea5e9; --devtools: #78716c;
-    --bg: #0f0f13; --card: #18181f; --border: rgba(255,255,255,0.07);
-    --text: #e4e4f0; --muted: #6b7280;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+/* ── Material Design 3 Tokens ─────────────────────────────────────── */
+:root {
+  --md-sys-color-primary:           #1a73e8;
+  --md-sys-color-on-primary:        #ffffff;
+  --md-sys-color-primary-container: #e8f0fe;
+  --md-sys-color-surface:           #ffffff;
+  --md-sys-color-surface-variant:   #f1f3f4;
+  --md-sys-color-background:        #f8f9fa;
+  --md-sys-color-on-surface:        #202124;
+  --md-sys-color-on-surface-variant:#5f6368;
+  --md-sys-color-outline:           #dadce0;
+  --md-sys-color-outline-variant:   #e8eaed;
 
-  /* Hero */
-  .hero { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 60px 24px 40px; text-align: center; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
-  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.15) 0%, transparent 70%); pointer-events: none; }
-  .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; letter-spacing: -0.03em; background: linear-gradient(135deg, #fff 30%, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 12px; }
-  .hero p { color: #94a3b8; font-size: 1.1rem; max-width: 600px; margin: 0 auto 32px; }
-  .stats-row { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
-  .stat { text-align: center; }
-  .stat-num { font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, #a5b4fc, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; }
-  .stat-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+  /* category tonal pairs: bg / text */
+  --cat-pm-bg:          #e8f0fe; --cat-pm-fg:          #1967d2;
+  --cat-marketing-bg:   #fef7e0; --cat-marketing-fg:   #b06000;
+  --cat-design-bg:      #fce8e6; --cat-design-fg:      #c5221f;
+  --cat-frontend-bg:    #e6f4ea; --cat-frontend-fg:    #137333;
+  --cat-backend-bg:     #e8f5e9; --cat-backend-fg:     #0d652d;
+  --cat-ai-bg:          #f3e8fd; --cat-ai-fg:          #7627bb;
+  --cat-mobile-bg:      #fff3e0; --cat-mobile-fg:      #e37400;
+  --cat-security-bg:    #fce8e6; --cat-security-fg:    #c5221f;
+  --cat-data-bg:        #e0f7fa; --cat-data-fg:        #007b83;
+  --cat-monitoring-bg:  #e8f0fe; --cat-monitoring-fg:  #0b57d0;
+  --cat-payments-bg:    #e6f4ea; --cat-payments-fg:    #137333;
+  --cat-web3-bg:        #ede7f6; --cat-web3-fg:        #5e35b1;
+  --cat-productivity-bg:#f5f5f5; --cat-productivity-fg:#616161;
+  --cat-cloud-bg:       #e1f5fe; --cat-cloud-fg:       #0277bd;
 
-  /* Search + Filters */
-  .controls { position: sticky; top: 0; z-index: 100; background: rgba(15,15,19,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 16px 24px; }
-  .controls-inner { max-width: 1400px; margin: 0 auto; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-  .search-wrap { flex: 1; min-width: 220px; position: relative; }
-  .search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
-  #search { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px 10px 38px; color: var(--text); font-size: 0.9rem; outline: none; transition: border-color .2s; }
-  #search:focus { border-color: var(--pm); }
-  #search::placeholder { color: var(--muted); }
-  .filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
-  .tab { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 0.78rem; cursor: pointer; transition: all .2s; white-space: nowrap; }
-  .tab:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
-  .tab.active { color: #fff; font-weight: 600; }
-  .tab[data-cat="all"].active { background: var(--pm); border-color: var(--pm); }
-  .tab[data-cat="pm"].active { background: var(--pm); border-color: var(--pm); }
-  .tab[data-cat="marketing"].active { background: var(--marketing); border-color: var(--marketing); color: #000; }
-  .tab[data-cat="design"].active { background: var(--design); border-color: var(--design); }
-  .tab[data-cat="frontend"].active { background: var(--frontend); border-color: var(--frontend); color: #000; }
-  .tab[data-cat="backend"].active { background: var(--backend); border-color: var(--backend); color: #000; }
-  .tab[data-cat="ai"].active { background: var(--ai); border-color: var(--ai); }
-  .tab[data-cat="mobile"].active { background: var(--mobile); border-color: var(--mobile); color: #000; }
-  .tab[data-cat="security"].active { background: var(--security); border-color: var(--security); }
-  .tab[data-cat="data"].active { background: var(--data); border-color: var(--data); color: #000; }
-  .tab[data-cat="monitoring"].active { background: var(--monitoring); border-color: var(--monitoring); }
-  .tab[data-cat="payments"].active { background: var(--payments); border-color: var(--payments); color: #000; }
-  .tab[data-cat="web3"].active { background: var(--web3); border-color: var(--web3); }
-  .tab[data-cat="productivity"].active { background: var(--productivity); border-color: var(--productivity); }
-  .tab[data-cat="cloud"].active { background: var(--cloud); border-color: var(--cloud); color: #000; }
+  /* elevation (Material 3) */
+  --elev-1: 0 1px 2px rgba(0,0,0,.1), 0 1px 3px 1px rgba(0,0,0,.07);
+  --elev-2: 0 1px 2px rgba(0,0,0,.1), 0 2px 6px 2px rgba(0,0,0,.1);
+  --elev-3: 0 4px 8px 3px rgba(0,0,0,.1), 0 1px 3px rgba(0,0,0,.1);
+}
 
-  /* Main */
-  .main { max-width: 1400px; margin: 0 auto; padding: 32px 24px 80px; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--md-sys-color-background);
+  color: var(--md-sys-color-on-surface);
+  font-family: 'Roboto', -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
 
-  /* Category section */
-  .category-section { margin-bottom: 48px; }
-  .cat-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-  .cat-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-  .cat-title { font-size: 1.3rem; font-weight: 700; }
-  .cat-count { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 2px 10px; font-size: 0.75rem; color: var(--muted); }
+/* ── App Bar ──────────────────────────────────────────────────────── */
+.app-bar {
+  background: var(--md-sys-color-surface);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: var(--elev-1);
+}
+.app-bar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.app-bar-logo svg { flex-shrink: 0; }
+.app-bar-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+}
+/* Google-style pill search bar */
+.search-bar {
+  flex: 1;
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+}
+.search-bar input {
+  width: 100%;
+  height: 40px;
+  background: var(--md-sys-color-surface-variant);
+  border: 1px solid transparent;
+  border-radius: 24px;
+  padding: 0 16px 0 44px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface);
+  outline: none;
+  transition: background .2s, border-color .2s, box-shadow .2s;
+}
+.search-bar input:focus {
+  background: var(--md-sys-color-surface);
+  border-color: var(--md-sys-color-primary);
+  box-shadow: 0 0 0 3px rgba(26,115,232,.15);
+}
+.search-bar input::placeholder { color: var(--md-sys-color-on-surface-variant); }
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--md-sys-color-on-surface-variant);
+  pointer-events: none;
+}
+.app-bar-source {
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.app-bar-source a {
+  color: var(--md-sys-color-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+.app-bar-source a:hover { text-decoration: underline; }
 
-  /* Provider group */
-  .provider-group { margin-bottom: 24px; }
-  .provider-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-  .provider-label span { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; }
+/* ── Hero banner ──────────────────────────────────────────────────── */
+.hero {
+  background: var(--md-sys-color-primary-container);
+  padding: 48px 24px 40px;
+  text-align: center;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+.hero h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1967d2;
+  letter-spacing: -.5px;
+  margin-bottom: 8px;
+}
+.hero p {
+  font-size: 15px;
+  color: var(--md-sys-color-on-surface-variant);
+  max-width: 560px;
+  margin: 0 auto 32px;
+}
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  box-shadow: var(--elev-1);
+}
+.stat-chip strong {
+  color: var(--md-sys-color-primary);
+  font-weight: 700;
+}
 
-  /* Skill grid */
-  .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; }
+/* ── Filter chips row ─────────────────────────────────────────────── */
+.filter-row {
+  background: var(--md-sys-color-surface);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  padding: 12px 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.filter-row::-webkit-scrollbar { display: none; }
+.chips-inner {
+  display: flex;
+  gap: 8px;
+  min-width: max-content;
+}
+/* Material 3 filter chip */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--md-sys-color-outline);
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  font-family: 'Roboto', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
+  white-space: nowrap;
+  user-select: none;
+}
+.chip:hover {
+  background: rgba(26,115,232,.06);
+  border-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-primary);
+}
+.chip.active {
+  background: var(--md-sys-color-primary-container);
+  border-color: var(--md-sys-color-primary);
+  color: var(--cat-pm-fg);
+  box-shadow: none;
+}
+.chip.active .chip-check { display: inline; }
+.chip-check { display: none; width: 14px; height: 14px; }
 
-  /* Skill card */
-  .skill-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; transition: all .18s; cursor: pointer; text-decoration: none; }
-  .skill-card:hover { border-color: rgba(255,255,255,0.18); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
-  .skill-name { font-size: 0.82rem; font-weight: 600; font-family: 'SF Mono', 'Fira Code', monospace; color: #a5b4fc; display: flex; align-items: center; gap: 6px; }
-  .skill-name .cat-tag { display: inline-block; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-  .skill-desc { font-size: 0.83rem; color: #94a3b8; line-height: 1.45; }
-  .skill-card:hover .skill-name { color: #c7d2fe; }
+/* ── Main layout ──────────────────────────────────────────────────── */
+.main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 24px 80px;
+}
 
-  /* PM top banner */
-  .pm-banner { background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(124,58,237,0.08)); border: 1px solid rgba(99,102,241,0.3); border-radius: 16px; padding: 20px 24px; margin-bottom: 32px; display: flex; align-items: center; gap: 16px; }
-  .pm-banner-icon { font-size: 2.5rem; }
-  .pm-banner-text h2 { font-size: 1rem; font-weight: 700; color: #a5b4fc; margin-bottom: 4px; }
-  .pm-banner-text p { font-size: 0.85rem; color: #64748b; }
+/* ── Category section ─────────────────────────────────────────────── */
+.cat-section { margin-bottom: 40px; }
+.cat-section[data-cat="pm"] { order: -1; }
 
-  /* Sub-section headers inside PM */
-  .sub-section { margin-bottom: 16px; }
-  .sub-section-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); border-left: 3px solid var(--pm); padding-left: 10px; margin-bottom: 10px; }
+.cat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+.cat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+.cat-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+  flex: 1;
+}
+.cat-badge {
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  letter-spacing: .3px;
+}
 
-  /* No results */
-  .no-results { text-align: center; padding: 80px 24px; color: var(--muted); }
-  .no-results p { font-size: 1.1rem; margin-top: 16px; }
+/* ── Provider group ───────────────────────────────────────────────── */
+.provider-group { margin-bottom: 16px; }
+.provider-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.provider-name {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--md-sys-color-on-surface-variant);
+}
+.provider-sub {
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+}
 
-  /* Hidden */
-  .hidden { display: none !important; }
+/* ── Skill cards ──────────────────────────────────────────────────── */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 8px;
+}
+.skill-card {
+  background: var(--md-sys-color-surface);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-decoration: none;
+  transition: box-shadow .18s, border-color .18s, transform .18s;
+  cursor: pointer;
+}
+.skill-card:hover {
+  box-shadow: var(--elev-2);
+  border-color: transparent;
+  transform: translateY(-1px);
+}
+.skill-card:hover .skill-name { color: var(--md-sys-color-primary); }
+.skill-name {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1967d2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.skill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.skill-desc {
+  font-size: 12.5px;
+  color: var(--md-sys-color-on-surface-variant);
+  line-height: 1.5;
+}
 
-  @media (max-width: 600px) {
-    .hero { padding: 40px 16px 28px; }
-    .stats-row { gap: 20px; }
-    .skills-grid { grid-template-columns: 1fr; }
-  }
+/* ── PM spotlight ─────────────────────────────────────────────────── */
+.pm-spotlight {
+  background: var(--md-sys-color-primary-container);
+  border: 1.5px solid #c5d8fc;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.pm-spotlight-icon { font-size: 36px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+.pm-spotlight-body h2 { font-size: 15px; font-weight: 700; color: #1967d2; margin-bottom: 4px; }
+.pm-spotlight-body p { font-size: 13px; color: var(--md-sys-color-on-surface-variant); }
+
+/* ── Sub-section labels ───────────────────────────────────────────── */
+.sub-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--md-sys-color-on-surface-variant);
+  background: var(--md-sys-color-surface-variant);
+  border-radius: 4px;
+  padding: 2px 8px;
+  display: inline-block;
+  margin-bottom: 8px;
+  margin-top: 12px;
+}
+
+/* ── Empty state ──────────────────────────────────────────────────── */
+.empty {
+  text-align: center;
+  padding: 80px 24px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+.empty svg { opacity: .3; margin-bottom: 16px; }
+.empty p { font-size: 16px; font-weight: 500; }
+.empty small { font-size: 13px; margin-top: 4px; display: block; }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .app-bar { padding: 0 16px; }
+  .app-bar-source { display: none; }
+  .main { padding: 16px 16px 60px; }
+  .hero { padding: 32px 16px 28px; }
+  .hero h1 { font-size: 24px; }
+  .skills-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
 
-<div class="hero">
-  <h1>Awesome Agent Skills</h1>
-  <p>1,100+ hand-picked skills from leading engineering teams. Compatible with Claude Code, Cursor, GitHub Copilot, Gemini CLI &amp; more.</p>
-  <div class="stats-row">
-    <div class="stat"><div class="stat-num">1,100+</div><div class="stat-label">Total Skills</div></div>
-    <div class="stat"><div class="stat-num">111</div><div class="stat-label">PM Skills</div></div>
-    <div class="stat"><div class="stat-num">43</div><div class="stat-label">Marketing Skills</div></div>
-    <div class="stat"><div class="stat-num">50+</div><div class="stat-label">Contributors</div></div>
-  </div>
-</div>
+<!-- App Bar -->
+<header class="app-bar">
+  <a class="app-bar-logo" href="https://github.com/VoltAgent/awesome-agent-skills" target="_blank" rel="noopener">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <rect width="28" height="28" rx="7" fill="#1a73e8"/>
+      <path d="M8 19l4-8 4 8M10 16h4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="20" cy="10" r="2.5" fill="#fff"/>
+    </svg>
+    <span class="app-bar-title">Awesome Agent Skills</span>
+  </a>
 
-<div class="controls">
-  <div class="controls-inner">
-    <div class="search-wrap">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input id="search" type="text" placeholder="Search skills…" autocomplete="off">
-    </div>
-    <div class="filter-tabs">
-      <button class="tab active" data-cat="all">All</button>
-      <button class="tab" data-cat="pm">Product Management</button>
-      <button class="tab" data-cat="marketing">Marketing</button>
-      <button class="tab" data-cat="design">Design</button>
-      <button class="tab" data-cat="frontend">Frontend</button>
-      <button class="tab" data-cat="backend">Backend</button>
-      <button class="tab" data-cat="ai">AI / ML</button>
-      <button class="tab" data-cat="mobile">Mobile</button>
-      <button class="tab" data-cat="security">Security</button>
-      <button class="tab" data-cat="data">Data</button>
-      <button class="tab" data-cat="monitoring">Monitoring</button>
-      <button class="tab" data-cat="payments">Payments</button>
-      <button class="tab" data-cat="web3">Web3</button>
-      <button class="tab" data-cat="productivity">Productivity</button>
-      <button class="tab" data-cat="cloud">Cloud</button>
-    </div>
+  <div class="search-bar">
+    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input id="search" type="search" placeholder="Search 1,100+ skills…" autocomplete="off" spellcheck="false">
   </div>
-</div>
 
-<div class="main" id="main"></div>
+  <span class="app-bar-source">Source: <a href="https://github.com/VoltAgent/awesome-agent-skills" target="_blank">GitHub ↗</a></span>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <h1>1,100+ Agent Skills</h1>
+  <p>Hand-picked from official engineering teams at Anthropic, Google, Microsoft, Vercel, Stripe, and more. Compatible with Claude Code, Cursor, Copilot, and Gemini CLI.</p>
+  <div class="stats">
+    <div class="stat-chip"><strong>111</strong> PM Skills</div>
+    <div class="stat-chip"><strong>43</strong> Marketing Skills</div>
+    <div class="stat-chip"><strong>133</strong> Azure Skills</div>
+    <div class="stat-chip"><strong>34</strong> Sentry SDKs</div>
+    <div class="stat-chip"><strong>50+</strong> Contributors</div>
+  </div>
+</section>
+
+<!-- Filter chips -->
+<nav class="filter-row">
+  <div class="chips-inner">
+    <button class="chip active" data-cat="all">
+      <svg class="chip-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      All categories
+    </button>
+    <button class="chip" data-cat="pm">Product Management</button>
+    <button class="chip" data-cat="marketing">Marketing</button>
+    <button class="chip" data-cat="design">Design & Creative</button>
+    <button class="chip" data-cat="frontend">Frontend</button>
+    <button class="chip" data-cat="backend">Backend & Infra</button>
+    <button class="chip" data-cat="ai">AI / ML</button>
+    <button class="chip" data-cat="mobile">Mobile</button>
+    <button class="chip" data-cat="security">Auth & Security</button>
+    <button class="chip" data-cat="data">Data & DBs</button>
+    <button class="chip" data-cat="monitoring">Monitoring</button>
+    <button class="chip" data-cat="payments">Payments</button>
+    <button class="chip" data-cat="web3">Web3</button>
+    <button class="chip" data-cat="productivity">Productivity</button>
+    <button class="chip" data-cat="cloud">Cloud</button>
+  </div>
+</nav>
+
+<main class="main" id="main"></main>
 
 <script>
-const CAT_COLORS = {
-  pm:'#6366f1', marketing:'#f59e0b', design:'#ec4899', frontend:'#06b6d4',
-  backend:'#10b981', ai:'#8b5cf6', mobile:'#f97316', security:'#ef4444',
-  data:'#14b8a6', monitoring:'#3b82f6', payments:'#22c55e', web3:'#a855f7',
-  productivity:'#64748b', cloud:'#0ea5e9', devtools:'#78716c'
+const CATS = {
+  pm:           { label:'Product Management',       icon:'📋', bg:'var(--cat-pm-bg)',          fg:'var(--cat-pm-fg)' },
+  marketing:    { label:'Marketing & Advertising',  icon:'📣', bg:'var(--cat-marketing-bg)',    fg:'var(--cat-marketing-fg)' },
+  design:       { label:'Design & Creative',        icon:'🎨', bg:'var(--cat-design-bg)',       fg:'var(--cat-design-fg)' },
+  frontend:     { label:'Frontend & Web',           icon:'🌐', bg:'var(--cat-frontend-bg)',     fg:'var(--cat-frontend-fg)' },
+  backend:      { label:'Backend & Infrastructure', icon:'⚙️', bg:'var(--cat-backend-bg)',      fg:'var(--cat-backend-fg)' },
+  ai:           { label:'AI & Machine Learning',    icon:'🤖', bg:'var(--cat-ai-bg)',           fg:'var(--cat-ai-fg)' },
+  mobile:       { label:'Mobile Development',       icon:'📱', bg:'var(--cat-mobile-bg)',       fg:'var(--cat-mobile-fg)' },
+  security:     { label:'Auth & Security',          icon:'🔒', bg:'var(--cat-security-bg)',     fg:'var(--cat-security-fg)' },
+  data:         { label:'Data & Databases',         icon:'🗄️', bg:'var(--cat-data-bg)',         fg:'var(--cat-data-fg)' },
+  monitoring:   { label:'Monitoring & Observability',icon:'📊',bg:'var(--cat-monitoring-bg)',   fg:'var(--cat-monitoring-fg)' },
+  payments:     { label:'Payments & Commerce',      icon:'💳', bg:'var(--cat-payments-bg)',     fg:'var(--cat-payments-fg)' },
+  web3:         { label:'Web3 & Crypto',            icon:'⛓️', bg:'var(--cat-web3-bg)',         fg:'var(--cat-web3-fg)' },
+  productivity: { label:'Productivity & Collab',    icon:'🗂️', bg:'var(--cat-productivity-bg)', fg:'var(--cat-productivity-fg)' },
+  cloud:        { label:'Cloud Platforms',          icon:'☁️', bg:'var(--cat-cloud-bg)',        fg:'var(--cat-cloud-fg)' },
 };
 
 const DATA = [
-  // ── PRODUCT MANAGEMENT ─────────────────────────────────────────────
+  // ── PRODUCT MANAGEMENT ────────────────────────────────────────────
   {cat:'pm', provider:'Dean Peters', sub:'Component Skills',
    skills:[
     ['deanpeters/acquisition-channel-advisor','Evaluate channels using unit economics and recommend scale/test/kill decisions','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/acquisition-channel-advisor'],
@@ -300,8 +608,8 @@ const DATA = [
     ['phuryn/review-resume','PM resume review against 10 best practices including XYZ+S formula','https://github.com/phuryn/pm-skills/tree/main/pm-toolkit/skills/review-resume'],
   ]},
 
-  // ── MARKETING ──────────────────────────────────────────────────────
-  {cat:'marketing', provider:'Corey Haines', sub:'SaaS Marketing (31 skills)',
+  // ── MARKETING ─────────────────────────────────────────────────────
+  {cat:'marketing', provider:'Corey Haines', sub:'SaaS Marketing · 31 skills',
    skills:[
     ['coreyhaines31/ab-test-setup','Plan and implement A/B tests or experiments for any digital experience','https://github.com/coreyhaines31/marketingskills/tree/main/skills/ab-test-setup'],
     ['coreyhaines31/ad-creative','Generate and iterate ad creative including headlines, descriptions, and primary text','https://github.com/coreyhaines31/marketingskills/tree/main/skills/ad-creative'],
@@ -311,7 +619,6 @@ const DATA = [
     ['coreyhaines31/cold-email','Write B2B cold emails and follow-up sequences that convert','https://github.com/coreyhaines31/marketingskills/tree/main/skills/cold-email'],
     ['coreyhaines31/competitor-alternatives','Build competitor comparison and alternative landing pages for SEO','https://github.com/coreyhaines31/marketingskills/tree/main/skills/competitor-alternatives'],
     ['coreyhaines31/content-strategy','Plan content strategy and decide what topics and formats to prioritize','https://github.com/coreyhaines31/marketingskills/tree/main/skills/content-strategy'],
-    ['coreyhaines31/copy-editing','Edit and improve existing marketing copy for clarity and impact','https://github.com/coreyhaines31/marketingskills/tree/main/skills/copy-editing'],
     ['coreyhaines31/copywriting','Write and rewrite marketing copy for landing pages, homepages, and ads','https://github.com/coreyhaines31/marketingskills/tree/main/skills/copywriting'],
     ['coreyhaines31/email-sequence','Build email sequences, drip campaigns, and lifecycle email flows','https://github.com/coreyhaines31/marketingskills/tree/main/skills/email-sequence'],
     ['coreyhaines31/form-cro','Optimize lead capture and contact forms to improve conversion','https://github.com/coreyhaines31/marketingskills/tree/main/skills/form-cro'],
@@ -336,9 +643,9 @@ const DATA = [
     ['coreyhaines31/site-architecture','Plan and restructure page hierarchy, navigation, and URL structure','https://github.com/coreyhaines31/marketingskills/tree/main/skills/site-architecture'],
     ['coreyhaines31/social-content','Create and schedule social media content for LinkedIn, Twitter/X, and Instagram','https://github.com/coreyhaines31/marketingskills/tree/main/skills/social-content'],
   ]},
-  {cat:'marketing', provider:'Kim Barrett', sub:'Direct-Response Advertising (12 skills)',
+  {cat:'marketing', provider:'Kim Barrett', sub:'Direct-Response Advertising · 12 skills',
    skills:[
-    ['realkimbarrett/avatar-extraction','Define exactly who the buyer is, what they want, what they\'ve tried, and what\'s driving their decisions','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/foundations/avatar-extraction'],
+    ['realkimbarrett/avatar-extraction','Define exactly who the buyer is, what they want, and what\'s driving their decisions','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/foundations/avatar-extraction'],
     ['realkimbarrett/offer-extraction','Turn a product or service into a compelling, high-converting offer','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/foundations/offer-extraction'],
     ['realkimbarrett/schwartz-awareness-mapper','Determine audience awareness level and the correct messaging approach','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/copy-chief/schwartz-awareness-mapper'],
     ['realkimbarrett/mechanism-builder','Explain why your solution works and others failed with a unique mechanism','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/copy-chief/mechanism-builder'],
@@ -352,7 +659,7 @@ const DATA = [
     ['realkimbarrett/generic-language-killer','Remove vague, corporate, or AI-sounding language and replace with clear, specific wording','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/qa/generic-language-killer'],
   ]},
 
-  // ── DESIGN ─────────────────────────────────────────────────────────
+  // ── DESIGN ────────────────────────────────────────────────────────
   {cat:'design', provider:'Anthropic / Claude', sub:'17 official skills',
    skills:[
     ['anthropics/docx','Create, edit, and analyze Word documents','https://officialskills.sh/anthropics/skills/docx'],
@@ -414,13 +721,13 @@ const DATA = [
     ['WordPress/wp-testing','PHPUnit for WordPress plugin/theme testing','https://officialskills.sh/WordPress/skills/wp-testing'],
     ['WordPress/wp-patterns','Block patterns and reusable components','https://officialskills.sh/WordPress/skills/wp-patterns'],
   ]},
-  {cat:'design', provider:'Remotion / Typefully', sub:'2 skills',
+  {cat:'design', provider:'Remotion · Typefully', sub:'2 skills',
    skills:[
     ['remotion-dev/remotion','Programmatic video creation with React','https://officialskills.sh/remotion-dev/skills/remotion'],
     ['typefully/typefully','Create, schedule, and publish social media content across X, LinkedIn, Threads, Bluesky, and Mastodon','https://officialskills.sh/typefully/skills/typefully'],
   ]},
 
-  // ── FRONTEND ───────────────────────────────────────────────────────
+  // ── FRONTEND ──────────────────────────────────────────────────────
   {cat:'frontend', provider:'Vercel Engineering', sub:'7 skills',
    skills:[
     ['vercel-labs/react-best-practices','React best practices and patterns','https://officialskills.sh/vercel-labs/skills/react-best-practices'],
@@ -436,24 +743,21 @@ const DATA = [
     ['angular/angular-developer','Generate Angular code and architectural guidance for components, services, reactivity','https://github.com/angular/skills'],
     ['angular/angular-new-app','Create new Angular apps using CLI with modern best practices','https://github.com/angular/skills'],
   ]},
-  {cat:'frontend', provider:'VoltAgent', sub:'4 skills',
+  {cat:'frontend', provider:'VoltAgent · Composio', sub:'5 skills',
    skills:[
     ['voltagent/create-voltagent','Project setup guide with CLI and manual steps','https://officialskills.sh/voltagent/skills/create-voltagent'],
     ['voltagent/voltagent-best-practices','Architecture and usage patterns for agents, workflows, memory, and servers','https://officialskills.sh/voltagent/skills/voltagent-best-practices'],
     ['voltagent/voltagent-core-reference','Reference for the VoltAgent class options and lifecycle methods','https://officialskills.sh/voltagent/skills/voltagent-core-reference'],
     ['voltagent/voltagent-docs-bundle','Lookup embedded docs from @voltagent/core for version-matched documentation','https://officialskills.sh/voltagent/skills/voltagent-docs-bundle'],
-  ]},
-  {cat:'frontend', provider:'Composio', sub:'1 skill',
-   skills:[
     ['composiohq/composio','Connect AI agents to 1000+ external apps with managed authentication','https://officialskills.sh/composiohq/skills/composio'],
   ]},
 
-  // ── BACKEND ────────────────────────────────────────────────────────
+  // ── BACKEND ───────────────────────────────────────────────────────
   {cat:'backend', provider:'Cloudflare', sub:'8 skills',
    skills:[
     ['cloudflare/agents-sdk','Build stateful AI agents with scheduling, RPC, and MCP servers','https://officialskills.sh/cloudflare/skills/agents-sdk'],
     ['cloudflare/cloudflare','Comprehensive platform skill covering Workers, Pages, storage, AI, networking, security, and IaC','https://officialskills.sh/cloudflare/skills/cloudflare'],
-    ['cloudflare/cloudflare-email-service','Send transactional email and route inbound mail with Cloudflare Email','https://officialskills.sh/cloudflare/skills/cloudflare-email-service'],
+    ['cloudflare/cloudflare-email-service','Send transactional email and route inbound mail','https://officialskills.sh/cloudflare/skills/cloudflare-email-service'],
     ['cloudflare/durable-objects','Stateful coordination with RPC, SQLite, and WebSockets','https://officialskills.sh/cloudflare/skills/durable-objects'],
     ['cloudflare/sandbox-sdk','Build sandboxed applications for secure, isolated code execution on Workers','https://officialskills.sh/cloudflare/skills/sandbox-sdk'],
     ['cloudflare/web-perf','Audit Core Web Vitals and render-blocking resources','https://officialskills.sh/cloudflare/skills/web-perf'],
@@ -497,13 +801,8 @@ const DATA = [
     ['firecrawl/firecrawl-build-scrape','Integrate Firecrawl /scrape for single-page extraction from product code','https://officialskills.sh/firecrawl/skills/firecrawl-build-scrape'],
     ['firecrawl/firecrawl-build-search','Integrate Firecrawl /search for query-first discovery with optional content hydration','https://officialskills.sh/firecrawl/skills/firecrawl-build-search'],
   ]},
-  {cat:'backend', provider:'Stripe', sub:'2 skills',
-   skills:[
-    ['stripe/stripe-best-practices','Best practices for building Stripe integrations','https://officialskills.sh/stripe/skills/stripe-best-practices'],
-    ['stripe/upgrade-stripe','Upgrade Stripe SDK and API versions','https://officialskills.sh/stripe/skills/upgrade-stripe'],
-  ]},
 
-  // ── AI / ML ────────────────────────────────────────────────────────
+  // ── AI / ML ───────────────────────────────────────────────────────
   {cat:'ai', provider:'Google Gemini', sub:'4 skills',
    skills:[
     ['google-gemini/gemini-api-dev','Best practices for developing Gemini-powered apps using the Gemini API','https://officialskills.sh/google-gemini/skills/gemini-api-dev'],
@@ -545,16 +844,10 @@ const DATA = [
     ['fal-ai/webhooks','Configure event-driven model inference callbacks','https://officialskills.sh/fal-ai/skills/webhooks'],
     ['fal-ai/face-swap','AI face swapping and manipulation','https://officialskills.sh/fal-ai/skills/face-swap'],
   ]},
-  {cat:'ai', provider:'Replicate', sub:'1 skill',
-   skills:[
-    ['replicate/replicate','Discover, compare, and run AI models using Replicate\'s API','https://officialskills.sh/replicate/skills/replicate'],
-  ]},
   {cat:'ai', provider:'Venice.ai', sub:'19 skills',
    skills:[
     ['veniceai/venice-api-overview','API basics, auth modes, pricing, and versioning','https://github.com/veniceai/skills/tree/main/skills/venice-api-overview'],
-    ['veniceai/venice-auth','API keys and wallet-based Venice authentication','https://github.com/veniceai/skills/tree/main/skills/venice-auth'],
     ['veniceai/venice-chat','Chat completions, multimodal inputs, tools, and streaming','https://github.com/veniceai/skills/tree/main/skills/venice-chat'],
-    ['veniceai/venice-responses','OpenAI-compatible Responses API for Venice','https://github.com/veniceai/skills/tree/main/skills/venice-responses'],
     ['veniceai/venice-embeddings','Embeddings models, dimensions, and encoding formats','https://github.com/veniceai/skills/tree/main/skills/venice-embeddings'],
     ['veniceai/venice-image-generate','Image generation endpoints and available styles','https://github.com/veniceai/skills/tree/main/skills/venice-image-generate'],
     ['veniceai/venice-image-edit','Image edits, upscaling, and background removal','https://github.com/veniceai/skills/tree/main/skills/venice-image-edit'],
@@ -563,30 +856,33 @@ const DATA = [
     ['veniceai/venice-audio-transcription','Audio transcription models and speech-to-text options','https://github.com/veniceai/skills/tree/main/skills/venice-audio-transcription'],
     ['veniceai/venice-video','Video generation and transcription workflows','https://github.com/veniceai/skills/tree/main/skills/venice-video'],
     ['veniceai/venice-models','Model catalog, traits, and compatibility mappings','https://github.com/veniceai/skills/tree/main/skills/venice-models'],
-    ['veniceai/venice-characters','Character endpoints and character_slug usage','https://github.com/veniceai/skills/tree/main/skills/venice-characters'],
     ['veniceai/venice-api-keys','API key CRUD, rate limits, and Web3 keys','https://github.com/veniceai/skills/tree/main/skills/venice-api-keys'],
     ['veniceai/venice-billing','Balance, usage, and billing analytics endpoints','https://github.com/veniceai/skills/tree/main/skills/venice-billing'],
     ['veniceai/venice-x402','Wallet credits and x402 payments on Base','https://github.com/veniceai/skills/tree/main/skills/venice-x402'],
-    ['veniceai/venice-crypto-rpc','JSON-RPC proxying for supported crypto networks','https://github.com/veniceai/skills/tree/main/skills/venice-crypto-rpc'],
     ['veniceai/venice-augment','Search, scraping, and text parsing endpoints','https://github.com/veniceai/skills/tree/main/skills/venice-augment'],
     ['veniceai/venice-errors','Error handling, retries, and API status codes','https://github.com/veniceai/skills/tree/main/skills/venice-errors'],
+    ['veniceai/venice-auth','API keys and wallet-based Venice authentication','https://github.com/veniceai/skills/tree/main/skills/venice-auth'],
+    ['veniceai/venice-responses','OpenAI-compatible Responses API for Venice','https://github.com/veniceai/skills/tree/main/skills/venice-responses'],
+    ['veniceai/venice-characters','Character endpoints and character_slug usage','https://github.com/veniceai/skills/tree/main/skills/venice-characters'],
+    ['veniceai/venice-crypto-rpc','JSON-RPC proxying for supported crypto networks','https://github.com/veniceai/skills/tree/main/skills/venice-crypto-rpc'],
   ]},
-  {cat:'ai', provider:'MiniMax', sub:'11 skills',
+  {cat:'ai', provider:'Replicate · MiniMax', sub:'12 skills',
    skills:[
+    ['replicate/replicate','Discover, compare, and run AI models using Replicate\'s API','https://officialskills.sh/replicate/skills/replicate'],
     ['MiniMax-AI/cli','Generate text, image, video, speech, and music via MiniMax AI','https://officialskills.sh/MiniMax-AI/skills/cli'],
-    ['MiniMax-AI/frontend-dev','Full-stack frontend with cinematic animations and AI-generated media via MiniMax API','https://officialskills.sh/MiniMax-AI/skills/frontend-dev'],
-    ['MiniMax-AI/fullstack-dev','Backend architecture with REST API design, auth flows, real-time features, and database integration','https://officialskills.sh/MiniMax-AI/skills/fullstack-dev'],
-    ['MiniMax-AI/android-native-dev','Android native development with Kotlin/Jetpack Compose, Material Design 3, and accessibility','https://officialskills.sh/MiniMax-AI/skills/android-native-dev'],
-    ['MiniMax-AI/ios-application-dev','iOS development with UIKit, SnapKit, and SwiftUI covering navigation, Dark Mode, and HIG compliance','https://officialskills.sh/MiniMax-AI/skills/ios-application-dev'],
-    ['MiniMax-AI/shader-dev','GLSL shader techniques for ray marching, fluid simulation, particle systems, and procedural generation','https://officialskills.sh/MiniMax-AI/skills/shader-dev'],
-    ['MiniMax-AI/gif-sticker-maker','Convert photos into animated GIF stickers in Funko Pop style via MiniMax API','https://officialskills.sh/MiniMax-AI/skills/gif-sticker-maker'],
+    ['MiniMax-AI/frontend-dev','Full-stack frontend with cinematic animations and AI-generated media','https://officialskills.sh/MiniMax-AI/skills/frontend-dev'],
+    ['MiniMax-AI/fullstack-dev','Backend architecture with REST API design, auth flows, real-time features','https://officialskills.sh/MiniMax-AI/skills/fullstack-dev'],
+    ['MiniMax-AI/android-native-dev','Android native development with Kotlin/Jetpack Compose and Material Design 3','https://officialskills.sh/MiniMax-AI/skills/android-native-dev'],
+    ['MiniMax-AI/ios-application-dev','iOS development with UIKit, SnapKit, and SwiftUI covering navigation and HIG compliance','https://officialskills.sh/MiniMax-AI/skills/ios-application-dev'],
+    ['MiniMax-AI/shader-dev','GLSL shader techniques for ray marching, fluid simulation, particle systems','https://officialskills.sh/MiniMax-AI/skills/shader-dev'],
+    ['MiniMax-AI/gif-sticker-maker','Convert photos into animated GIF stickers via MiniMax API','https://officialskills.sh/MiniMax-AI/skills/gif-sticker-maker'],
     ['MiniMax-AI/minimax-pdf','Generate, fill, and reformat PDFs with a token-based design system and 15 cover styles','https://officialskills.sh/MiniMax-AI/skills/minimax-pdf'],
     ['MiniMax-AI/pptx-generator','Create and edit PowerPoint presentations from scratch with PptxGenJS','https://officialskills.sh/MiniMax-AI/skills/pptx-generator'],
     ['MiniMax-AI/minimax-xlsx','Create, read, analyze, and validate Excel/spreadsheet files with zero format loss','https://officialskills.sh/MiniMax-AI/skills/minimax-xlsx'],
     ['MiniMax-AI/minimax-docx','Professional DOCX document creation and editing using OpenXML SDK','https://officialskills.sh/MiniMax-AI/skills/minimax-docx'],
   ]},
 
-  // ── MOBILE ─────────────────────────────────────────────────────────
+  // ── MOBILE ────────────────────────────────────────────────────────
   {cat:'mobile', provider:'Expo', sub:'11 skills',
    skills:[
     ['expo/building-native-ui','Build apps with Expo Router, styling, components, navigation, and animations','https://officialskills.sh/expo/skills/building-native-ui'],
@@ -601,20 +897,17 @@ const DATA = [
     ['expo/upgrading-expo','Upgrade Expo SDK versions','https://officialskills.sh/expo/skills/upgrading-expo'],
     ['expo/use-dom','Run web code in a webview on native using DOM components','https://officialskills.sh/expo/skills/use-dom'],
   ]},
-  {cat:'mobile', provider:'CallStack (React Native)', sub:'3 skills',
+  {cat:'mobile', provider:'CallStack · Flutter', sub:'6 skills',
    skills:[
     ['callstackincubator/react-native-best-practices','Performance optimization for React Native apps from Callstack','https://officialskills.sh/callstackincubator/skills/react-native-best-practices'],
     ['callstackincubator/github','GitHub workflow patterns for PRs, code review, branching','https://officialskills.sh/callstackincubator/skills/github'],
     ['callstackincubator/upgrading-react-native','React Native upgrade workflow: templates, dependencies, and common pitfalls','https://officialskills.sh/callstackincubator/skills/upgrading-react-native'],
-  ]},
-  {cat:'mobile', provider:'Flutter', sub:'3 skills',
-   skills:[
     ['flutter/flutter-setting-up-on-linux','Set up a Linux machine for Flutter desktop development','https://officialskills.sh/flutter/skills/flutter-setting-up-on-linux'],
     ['flutter/flutter-setting-up-on-macos','Set up a macOS machine for Flutter development','https://officialskills.sh/flutter/skills/flutter-setting-up-on-macos'],
     ['flutter/flutter-setting-up-on-windows','Set up a Windows machine for Flutter development','https://officialskills.sh/flutter/skills/flutter-setting-up-on-windows'],
   ]},
 
-  // ── SECURITY ───────────────────────────────────────────────────────
+  // ── SECURITY ──────────────────────────────────────────────────────
   {cat:'security', provider:'Trail of Bits', sub:'21 skills',
    skills:[
     ['trailofbits/ask-questions-if-underspecified','Prompt for clarification on ambiguous requirements','https://officialskills.sh/trailofbits/skills/ask-questions-if-underspecified'],
@@ -623,12 +916,10 @@ const DATA = [
     ['trailofbits/burpsuite-project-parser','Search and extract data from Burp Suite project files','https://officialskills.sh/trailofbits/skills/burpsuite-project-parser'],
     ['trailofbits/claude-in-chrome-troubleshooting','Diagnose and fix Claude in Chrome MCP extension connectivity issues','https://officialskills.sh/trailofbits/skills/claude-in-chrome-troubleshooting'],
     ['trailofbits/constant-time-analysis','Detect compiler-induced timing side-channels in crypto code','https://officialskills.sh/trailofbits/skills/constant-time-analysis'],
-    ['trailofbits/culture-index','Index and search culture documentation','https://officialskills.sh/trailofbits/skills/culture-index'],
     ['trailofbits/differential-review','Security-focused diff review with git history analysis','https://officialskills.sh/trailofbits/skills/differential-review'],
-    ['trailofbits/dwarf-expert','DWARF debugging format expertise','https://officialskills.sh/trailofbits/skills/dwarf-expert'],
     ['trailofbits/entry-point-analyzer','Identify state-changing entry points in smart contracts','https://officialskills.sh/trailofbits/skills/entry-point-analyzer'],
     ['trailofbits/firebase-apk-scanner','Scan Android APKs for Firebase misconfigurations and security vulnerabilities','https://officialskills.sh/trailofbits/skills/firebase-apk-scanner'],
-    ['trailofbits/insecure-defaults','Detect insecure default configurations like hardcoded secrets, default credentials, and weak crypto','https://officialskills.sh/trailofbits/skills/insecure-defaults'],
+    ['trailofbits/insecure-defaults','Detect insecure default configurations like hardcoded secrets and weak crypto','https://officialskills.sh/trailofbits/skills/insecure-defaults'],
     ['trailofbits/modern-python','Modern Python tooling with uv, ruff, ty, and pytest best practices','https://officialskills.sh/trailofbits/skills/modern-python'],
     ['trailofbits/property-based-testing','Property-based testing for multiple languages and smart contracts','https://officialskills.sh/trailofbits/skills/property-based-testing'],
     ['trailofbits/semgrep-rule-creator','Create and refine Semgrep rules for vulnerability detection','https://officialskills.sh/trailofbits/skills/semgrep-rule-creator'],
@@ -638,6 +929,8 @@ const DATA = [
     ['trailofbits/static-analysis','Static analysis toolkit with CodeQL, Semgrep, and SARIF','https://officialskills.sh/trailofbits/skills/static-analysis'],
     ['trailofbits/testing-handbook-skills','Testing Handbook skills: fuzzers, static analysis, sanitizers','https://officialskills.sh/trailofbits/skills/testing-handbook-skills'],
     ['trailofbits/variant-analysis','Find similar vulnerabilities via pattern-based analysis','https://officialskills.sh/trailofbits/skills/variant-analysis'],
+    ['trailofbits/culture-index','Index and search culture documentation','https://officialskills.sh/trailofbits/skills/culture-index'],
+    ['trailofbits/dwarf-expert','DWARF debugging format expertise','https://officialskills.sh/trailofbits/skills/dwarf-expert'],
   ]},
   {cat:'security', provider:'Better Auth', sub:'7 skills',
    skills:[
@@ -650,7 +943,7 @@ const DATA = [
     ['better-auth/twoFactor','Two-factor authentication with Better Auth','https://officialskills.sh/better-auth/skills/twoFactor'],
   ]},
 
-  // ── DATA ───────────────────────────────────────────────────────────
+  // ── DATA ──────────────────────────────────────────────────────────
   {cat:'data', provider:'Tinybird', sub:'4 skills',
    skills:[
     ['tinybirdco/tinybird-best-practices','Tinybird project guidelines for datasources, pipes, endpoints, and SQL','https://officialskills.sh/tinybirdco/skills/tinybird-best-practices'],
@@ -667,29 +960,28 @@ const DATA = [
     ['clickhouse/clickhousectl-cloud-deploy','Deploy to ClickHouse Cloud and migrate from local setups with clickhousectl','https://officialskills.sh/clickhouse/skills/clickhousectl-cloud-deploy'],
     ['clickhouse/clickhousectl-local-dev','Spin up a local ClickHouse development environment from zero with clickhousectl','https://officialskills.sh/clickhouse/skills/clickhousectl-local-dev'],
   ]},
-  {cat:'data', provider:'Neon / Supabase / DuckDB', sub:'5 skills',
+  {cat:'data', provider:'Neon · Supabase · DuckDB', sub:'5 skills',
    skills:[
     ['neondatabase/neon-postgres','Best practices for Neon Serverless Postgres','https://officialskills.sh/neondatabase/skills/neon-postgres'],
     ['neondatabase/claimable-postgres','Claimable Postgres database provisioning with Neon','https://officialskills.sh/neondatabase/skills/claimable-postgres'],
     ['neondatabase/neon-postgres-egress-optimizer','Optimize Neon Postgres egress and data transfer','https://officialskills.sh/neondatabase/skills/neon-postgres-egress-optimizer'],
     ['supabase/postgres-best-practices','PostgreSQL best practices for Supabase','https://officialskills.sh/supabase/skills/postgres-best-practices'],
-    ['duckdb/duckdb','In-process analytical SQL for files, databases, and cloud storage','https://officialskills.sh/duckdb/skills/duckdb'],
+    ['duckdb/duckdb','In-process analytical SQL for files, databases, and cloud storage without a server','https://officialskills.sh/duckdb/skills/duckdb'],
   ]},
 
-  // ── MONITORING ─────────────────────────────────────────────────────
-  {cat:'monitoring', provider:'Sentry', sub:'27 skills (selection)',
+  // ── MONITORING ────────────────────────────────────────────────────
+  {cat:'monitoring', provider:'Sentry', sub:'19 skills (selection from 34)',
    skills:[
     ['getsentry/sentry-sdk-setup','Set up Sentry in any language or framework — detects platform and routes to the right SDK','https://officialskills.sh/getsentry/skills/sentry-sdk-setup'],
     ['getsentry/sentry-workflow','End-to-end Sentry workflow: fix production issues and review code with Sentry context','https://officialskills.sh/getsentry/skills/sentry-workflow'],
     ['getsentry/sentry-fix-issues','Find and fix Sentry issues with stack trace, breadcrumb, and trace context via MCP','https://officialskills.sh/getsentry/skills/sentry-fix-issues'],
     ['getsentry/sentry-code-review','Review code changes using Sentry issue and trace context','https://officialskills.sh/getsentry/skills/sentry-code-review'],
-    ['getsentry/sentry-pr-code-review','Review PR comments from Seer Bug Prediction and Sentry feedback','https://officialskills.sh/getsentry/skills/sentry-pr-code-review'],
     ['getsentry/sentry-create-alert','Create Sentry alerts with email, Slack, PagerDuty, Discord, and more','https://officialskills.sh/getsentry/skills/sentry-create-alert'],
     ['getsentry/sentry-setup-ai-monitoring','Instrument OpenAI, Anthropic, Vercel AI, LangChain, Google GenAI, and Pydantic AI','https://officialskills.sh/getsentry/skills/sentry-setup-ai-monitoring'],
     ['getsentry/sentry-sdk-upgrade','Upgrade the Sentry JavaScript SDK across major versions','https://officialskills.sh/getsentry/skills/sentry-sdk-upgrade'],
     ['getsentry/sentry-nextjs-sdk','Full Sentry SDK setup for Next.js 13+ (App Router and Pages Router)','https://officialskills.sh/getsentry/skills/sentry-nextjs-sdk'],
     ['getsentry/sentry-python-sdk','Full Sentry SDK setup for Python (Django, Flask, FastAPI, Celery, Starlette)','https://officialskills.sh/getsentry/skills/sentry-python-sdk'],
-    ['getsentry/sentry-react-sdk','Full Sentry SDK setup for React (React Router v5-v7, TanStack Router, Redux)','https://officialskills.sh/getsentry/skills/sentry-react-sdk'],
+    ['getsentry/sentry-react-sdk','Full Sentry SDK setup for React (React Router, TanStack Router, Redux, Vite)','https://officialskills.sh/getsentry/skills/sentry-react-sdk'],
     ['getsentry/sentry-node-sdk','Full Sentry SDK setup for Node.js, Bun, and Deno','https://officialskills.sh/getsentry/skills/sentry-node-sdk'],
     ['getsentry/sentry-go-sdk','Full Sentry SDK setup for Go (net/http, Gin, Echo, Fiber, FastHTTP)','https://officialskills.sh/getsentry/skills/sentry-go-sdk'],
     ['getsentry/sentry-flutter-sdk','Full Sentry SDK setup for Flutter and Dart across all platforms','https://officialskills.sh/getsentry/skills/sentry-flutter-sdk'],
@@ -698,6 +990,7 @@ const DATA = [
     ['getsentry/sentry-ruby-sdk','Full Sentry SDK setup for Ruby (Rails, Sinatra, Rack, Sidekiq, Resque)','https://officialskills.sh/getsentry/skills/sentry-ruby-sdk'],
     ['getsentry/sentry-php-sdk','Full Sentry SDK setup for PHP, Laravel, and Symfony','https://officialskills.sh/getsentry/skills/sentry-php-sdk'],
     ['getsentry/sentry-dotnet-sdk','Full Sentry SDK setup for .NET (ASP.NET Core, MAUI, WPF, WinForms, Blazor)','https://officialskills.sh/getsentry/skills/sentry-dotnet-sdk'],
+    ['getsentry/sentry-elixir-sdk','Full Sentry SDK setup for Elixir, Phoenix, Plug, LiveView, Oban, and Quantum','https://officialskills.sh/getsentry/skills/sentry-elixir-sdk'],
   ]},
   {cat:'monitoring', provider:'Datadog Labs', sub:'2 skills',
    skills:[
@@ -705,8 +998,8 @@ const DATA = [
     ['datadog-labs/dd-llmo-eval-bootstrap','Analyze production LLM traces and generate evaluators','https://officialskills.sh/datadog-labs/skills/dd-llmo-eval-bootstrap'],
   ]},
 
-  // ── PAYMENTS ───────────────────────────────────────────────────────
-  {cat:'payments', provider:'Stripe / Coinbase', sub:'5 skills',
+  // ── PAYMENTS ──────────────────────────────────────────────────────
+  {cat:'payments', provider:'Stripe · Coinbase', sub:'5 skills',
    skills:[
     ['stripe/stripe-best-practices','Best practices for building Stripe integrations','https://officialskills.sh/stripe/skills/stripe-best-practices'],
     ['stripe/upgrade-stripe','Upgrade Stripe SDK and API versions','https://officialskills.sh/stripe/skills/upgrade-stripe'],
@@ -715,19 +1008,19 @@ const DATA = [
     ['coinbase/base-chain-trading','Trading and DeFi operations on Base chain','https://officialskills.sh/coinbase/skills/base-chain-trading'],
   ]},
 
-  // ── WEB3 ───────────────────────────────────────────────────────────
+  // ── WEB3 ──────────────────────────────────────────────────────────
   {cat:'web3', provider:'Binance', sub:'7 skills',
    skills:[
     ['binance/crypto-market-rank','Query crypto market rankings including trending tokens, smart money inflows, meme rankings','https://officialskills.sh/binance/skills/crypto-market-rank'],
     ['binance/meme-rush','Track real-time meme token lists from launchpads (Pump.fun, Four.meme) and AI-powered hot market topics','https://officialskills.sh/binance/skills/meme-rush'],
     ['binance/query-address-info','Retrieve all token holdings and portfolio positions for any wallet address on BSC, Base, or Solana','https://officialskills.sh/binance/skills/query-address-info'],
-    ['binance/query-token-audit','Audit token security to detect scams, honeypots, and malicious contracts across BSC, Base, Solana, and Ethereum','https://officialskills.sh/binance/skills/query-token-audit'],
+    ['binance/query-token-audit','Audit token security to detect scams, honeypots, and malicious contracts across multiple chains','https://officialskills.sh/binance/skills/query-token-audit'],
     ['binance/query-token-info','Search tokens and fetch metadata, real-time market data, and K-Line candlestick charts','https://officialskills.sh/binance/skills/query-token-info'],
     ['binance/trading-signal','Monitor on-chain Smart Money buy/sell signals with price, max gain, and exit rate data','https://officialskills.sh/binance/skills/trading-signal'],
     ['binance/spot','Place and manage spot trading orders on Binance via API key authentication','https://officialskills.sh/binance/skills/spot'],
   ]},
 
-  // ── PRODUCTIVITY ───────────────────────────────────────────────────
+  // ── PRODUCTIVITY ──────────────────────────────────────────────────
   {cat:'productivity', provider:'Google Workspace CLI', sub:'17 skills',
    skills:[
     ['googleworkspace/gws-shared','Shared authentication, global flags, and output formatting','https://officialskills.sh/googleworkspace/skills/gws-shared'],
@@ -748,15 +1041,15 @@ const DATA = [
     ['googleworkspace/gws-modelarmor','Filter user-generated content for safety','https://officialskills.sh/googleworkspace/skills/gws-modelarmor'],
     ['googleworkspace/gws-workflow','Cross-service Google Workspace productivity workflows','https://officialskills.sh/googleworkspace/skills/gws-workflow'],
   ]},
-  {cat:'productivity', provider:'Courier / Resend / Notion', sub:'3 skills',
+  {cat:'productivity', provider:'Courier · Resend · Notion', sub:'3 skills',
    skills:[
     ['trycourier/courier-skills','Multi-channel notifications via email, SMS, push, and chat','https://github.com/trycourier/courier-skills'],
     ['resend/resend','Transactional email sending with Resend API','https://officialskills.sh/resend/skills/resend'],
     ['notion/notion','Knowledge management, database, and workspace integration','https://officialskills.sh/notion/skills/notion'],
   ]},
 
-  // ── CLOUD ──────────────────────────────────────────────────────────
-  {cat:'cloud', provider:'Microsoft Azure', sub:'Core + 133 SDK skills',
+  // ── CLOUD ─────────────────────────────────────────────────────────
+  {cat:'cloud', provider:'Microsoft Azure', sub:'Core + 133 SDK skills across 6 languages',
    skills:[
     ['microsoft/cloud-solution-architect','Design well-architected Azure cloud systems','https://officialskills.sh/microsoft/skills/cloud-solution-architect'],
     ['microsoft/continual-learning','Continual learning patterns for Azure AI','https://officialskills.sh/microsoft/skills/continual-learning'],
@@ -781,114 +1074,93 @@ const DATA = [
   ]},
 ];
 
-// ── CATEGORY METADATA ────────────────────────────────────────────────
-const CATS = {
-  pm:          { label: 'Product Management', color: '#6366f1' },
-  marketing:   { label: 'Marketing & Advertising', color: '#f59e0b' },
-  design:      { label: 'Design & Creative', color: '#ec4899' },
-  frontend:    { label: 'Frontend & Web', color: '#06b6d4' },
-  backend:     { label: 'Backend & Infrastructure', color: '#10b981' },
-  ai:          { label: 'AI & Machine Learning', color: '#8b5cf6' },
-  mobile:      { label: 'Mobile Development', color: '#f97316' },
-  security:    { label: 'Auth & Security', color: '#ef4444' },
-  data:        { label: 'Data & Databases', color: '#14b8a6' },
-  monitoring:  { label: 'Monitoring & Observability', color: '#3b82f6' },
-  payments:    { label: 'Payments & Commerce', color: '#22c55e' },
-  web3:        { label: 'Web3 & Crypto', color: '#a855f7' },
-  productivity:{ label: 'Productivity & Collaboration', color: '#64748b' },
-  cloud:       { label: 'Cloud Platforms', color: '#0ea5e9' },
-};
+// ─── RENDER ───────────────────────────────────────────────────────────
+let activeFilter = 'all', searchQuery = '';
 
-// ── RENDER ────────────────────────────────────────────────────────────
-function render(filter = 'all', query = '') {
-  const main = document.getElementById('main');
-  const q = query.toLowerCase().trim();
-
-  // Group data by category in order
+function render() {
+  const q = searchQuery.toLowerCase().trim();
   const catOrder = Object.keys(CATS);
   const grouped = {};
-  DATA.forEach(group => {
-    if (!grouped[group.cat]) grouped[group.cat] = [];
-    grouped[group.cat].push(group);
+  DATA.forEach(g => {
+    if (!grouped[g.cat]) grouped[g.cat] = [];
+    grouped[g.cat].push(g);
   });
 
   let html = '';
-  let totalVisible = 0;
+  let total = 0;
 
   catOrder.forEach(cat => {
-    if (filter !== 'all' && filter !== cat) return;
+    if (activeFilter !== 'all' && activeFilter !== cat) return;
     if (!grouped[cat]) return;
-
-    const catMeta = CATS[cat];
-    let catHtml = '';
+    const m = CATS[cat];
+    let catBody = '';
     let catCount = 0;
 
     grouped[cat].forEach(group => {
-      const matchedSkills = group.skills.filter(([name, desc]) => {
-        if (!q) return true;
-        return name.toLowerCase().includes(q) || desc.toLowerCase().includes(q) || group.provider.toLowerCase().includes(q);
-      });
-      if (!matchedSkills.length) return;
-      catCount += matchedSkills.length;
+      const matched = group.skills.filter(([name, desc]) =>
+        !q || name.toLowerCase().includes(q) || desc.toLowerCase().includes(q) || group.provider.toLowerCase().includes(q)
+      );
+      if (!matched.length) return;
+      catCount += matched.length;
 
-      const cardsHtml = matchedSkills.map(([name, desc, url]) => `
+      const cards = matched.map(([name, desc, url]) => `
         <a class="skill-card" href="${url}" target="_blank" rel="noopener">
           <div class="skill-name">
-            <span class="cat-tag" style="background:${catMeta.color}"></span>
-            ${name}
+            <span class="skill-dot" style="background:${m.fg}"></span>${name}
           </div>
           <div class="skill-desc">${desc}</div>
         </a>`).join('');
 
-      catHtml += `
+      catBody += `
         <div class="provider-group">
-          <div class="provider-label"><span>${group.provider}</span>${group.sub ? ' · ' + group.sub : ''}</div>
-          <div class="skills-grid">${cardsHtml}</div>
+          <div class="provider-row">
+            <span class="provider-name">${group.provider}</span>
+            ${group.sub ? `<span class="provider-sub">· ${group.sub}</span>` : ''}
+          </div>
+          <div class="skills-grid">${cards}</div>
         </div>`;
     });
 
     if (!catCount) return;
-    totalVisible += catCount;
+    total += catCount;
 
-    const isPm = cat === 'pm';
     html += `
-      <div class="category-section" data-cat="${cat}">
+      <section class="cat-section" data-cat="${cat}">
         <div class="cat-header">
-          <div class="cat-dot" style="background:${catMeta.color}"></div>
-          <div class="cat-title">${catMeta.label}</div>
-          <div class="cat-count">${catCount} skills</div>
+          <div class="cat-icon" style="background:${m.bg}">${m.icon}</div>
+          <span class="cat-name">${m.label}</span>
+          <span class="cat-badge" style="background:${m.bg};color:${m.fg}">${catCount} skills</span>
         </div>
-        ${catHtml}
-      </div>`;
+        ${catBody}
+      </section>`;
   });
 
-  if (!totalVisible) {
-    html = `<div class="no-results"><svg width="48" height="48" fill="none" stroke="#6b7280" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No skills matched "<strong>${query}</strong>"</p></div>`;
+  if (!total) {
+    html = `<div class="empty">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <p>No results for "${searchQuery}"</p>
+      <small>Try a different search term or clear the filter</small>
+    </div>`;
   }
 
-  main.innerHTML = html;
+  document.getElementById('main').innerHTML = html;
 }
 
-// ── CONTROLS ──────────────────────────────────────────────────────────
-let activeFilter = 'all';
-let searchQuery = '';
-
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    activeFilter = tab.dataset.cat;
-    render(activeFilter, searchQuery);
+// Filter chips
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeFilter = chip.dataset.cat;
+    render();
   });
 });
 
-let searchTimer;
+// Search
+let timer;
 document.getElementById('search').addEventListener('input', e => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    searchQuery = e.target.value;
-    render(activeFilter, searchQuery);
-  }, 150);
+  clearTimeout(timer);
+  timer = setTimeout(() => { searchQuery = e.target.value; render(); }, 150);
 });
 
 render();
