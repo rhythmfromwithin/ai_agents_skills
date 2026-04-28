@@ -1525,29 +1525,30 @@ async function fetchSkillDetails(url, skillName) {
 
 function parseSkillMarkdown(markdown) {
   const result = {
-    install: '',
-    usage: '',
-    summary: ''
+    description: '',
+    purpose: '',
+    content: ''
   };
 
-  // Extract sections using regex
-  const installMatch = markdown.match(/##\s*(Installation|安装|How to Install|如何安装)[\s\S]*?(?=##|$)/i);
-  const usageMatch = markdown.match(/##\s*(Usage|使用|How to Use|如何使用)[\s\S]*?(?=##|$)/i);
-  const summaryMatch = markdown.match(/##\s*(Summary|简介|Description|说明)[\s\S]*?(?=##|$)/i);
-
-  if (installMatch) {
-    result.install = installMatch[0].replace(/##\s*(Installation|安装|How to Install|如何安装)/i, '').trim();
-  }
-  if (usageMatch) {
-    result.usage = usageMatch[0].replace(/##\s*(Usage|使用|How to Use|如何使用)/i, '').trim();
-  }
-  if (summaryMatch) {
-    result.summary = summaryMatch[0].replace(/##\s*(Summary|简介|Description|说明)/i, '').trim();
+  // Extract frontmatter description
+  const frontmatterMatch = markdown.match(/^---\n([\s\S]*?)\n---/);
+  if (frontmatterMatch) {
+    const descMatch = frontmatterMatch[1].match(/description:\s*(.+?)(?=\n\w+:|$)/s);
+    if (descMatch) {
+      result.description = descMatch[1].trim().replace(/^>-?\s*/gm, '');
+    }
   }
 
-  // If no sections found, use first 500 chars as summary
-  if (!result.install && !result.usage && !result.summary) {
-    result.summary = markdown.substring(0, 500) + '...';
+  // Extract Purpose section
+  const purposeMatch = markdown.match(/##\s*Purpose\s*\n([\s\S]*?)(?=\n##|$)/i);
+  if (purposeMatch) {
+    result.purpose = purposeMatch[1].trim().substring(0, 300);
+  }
+
+  // Extract first meaningful section after frontmatter
+  const contentMatch = markdown.match(/---\n\n([\s\S]*?)(?=\n##\s*Key Concepts|$)/);
+  if (contentMatch) {
+    result.content = contentMatch[1].trim().substring(0, 400);
   }
 
   return result;
@@ -1577,22 +1578,42 @@ function toggleSkillDetails(card) {
       const skillName = card.dataset.skillName;
       
       fetchSkillDetails(url, skillName).then(details => {
-        detailsContent.innerHTML = `
-          ${details.install ? `<div class="skill-details-section">
-            <div class="skill-details-title">如何安装</div>
-            <div class="skill-details-text">${details.install}</div>
-          </div>` : ''}
-          ${details.usage ? `<div class="skill-details-section">
-            <div class="skill-details-title">如何使用</div>
-            <div class="skill-details-text">${details.usage}</div>
-          </div>` : ''}
-          ${details.summary ? `<div class="skill-details-section">
+        let html = '';
+
+        if (details.description) {
+          html += `<div class="skill-details-section">
             <div class="skill-details-title">简介</div>
-            <div class="skill-details-text">${details.summary}</div>
-          </div>` : ''}
-        `;
+            <div class="skill-details-text">${details.description}</div>
+          </div>`;
+        }
+
+        if (details.purpose) {
+          html += `<div class="skill-details-section">
+            <div class="skill-details-title">用途</div>
+            <div class="skill-details-text">${details.purpose}</div>
+          </div>`;
+        }
+
+        if (details.content) {
+          html += `<div class="skill-details-section">
+            <div class="skill-details-title">详细说明</div>
+            <div class="skill-details-text">${details.content}</div>
+          </div>`;
+        }
+
+        html += `<div class="skill-details-section">
+          <a href="${url}" target="_blank" rel="noopener" style="color: #1976d2; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+            查看完整文档 →
+          </a>
+        </div>`;
+
+        detailsContent.innerHTML = html || '<div class="skill-details-error">无法加载详情</div>';
       }).catch(() => {
-        detailsContent.innerHTML = '<div class="skill-details-error">无法加载详情</div>';
+        detailsContent.innerHTML = `<div class="skill-details-section">
+          <a href="${url}" target="_blank" rel="noopener" style="color: #1976d2; text-decoration: none;">
+            查看完整文档 →
+          </a>
+        </div>`;
       });
     }
   }
