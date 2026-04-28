@@ -1396,42 +1396,54 @@ let activeFilter = 'all', searchQuery = '';
 function render() {
   const q = searchQuery.toLowerCase().trim();
   const catOrder = Object.keys(CATS);
+
+  // Group skills by category, then by provider
   const grouped = {};
-  DATA.forEach(g => {
-    if (!grouped[g.cat]) grouped[g.cat] = [];
-    grouped[g.cat].push(g);
+  DATA.forEach(skill => {
+    if (!grouped[skill.cat]) grouped[skill.cat] = {};
+    if (!grouped[skill.cat][skill.provider]) grouped[skill.cat][skill.provider] = [];
+    grouped[skill.cat][skill.provider].push(skill);
   });
 
   let html = '';
   let total = 0;
+  const catCounts = {};
 
   catOrder.forEach(cat => {
     if (activeFilter !== 'all' && activeFilter !== cat) return;
     if (!grouped[cat]) return;
+
     const m = CATS[cat];
     let catBody = '';
     let catCount = 0;
 
-    grouped[cat].forEach(group => {
-      const matched = group.skills.filter(([name, desc]) =>
-        !q || name.toLowerCase().includes(q) || desc.toLowerCase().includes(q) || group.provider.toLowerCase().includes(q)
+    // Iterate through providers in this category
+    Object.keys(grouped[cat]).sort().forEach(provider => {
+      const skills = grouped[cat][provider];
+
+      // Filter skills by search query
+      const matched = skills.filter(skill =>
+        !q ||
+        skill.name.toLowerCase().includes(q) ||
+        skill.provider.toLowerCase().includes(q)
       );
+
       if (!matched.length) return;
       catCount += matched.length;
 
-      const cards = matched.map(([name, desc, url]) => `
-        <a class="skill-card" href="${url}" target="_blank" rel="noopener">
+      // Generate skill cards
+      const cards = matched.map(skill => `
+        <a class="skill-card" href="${skill.url}" target="_blank" rel="noopener">
           <div class="skill-name">
-            <span class="skill-dot" style="background:${m.fg}"></span>${name}
+            <span class="skill-dot" style="background:${m.fg}"></span>${skill.name}
           </div>
-          <div class="skill-desc">${desc}</div>
+          <div class="skill-desc">${skill.provider}</div>
         </a>`).join('');
 
       catBody += `
         <div class="provider-group">
           <div class="provider-row">
-            <span class="provider-name">${group.provider}</span>
-            ${group.sub ? `<span class="provider-sub">· ${group.sub}</span>` : ''}
+            <span class="provider-name">${provider}</span>
           </div>
           <div class="skills-grid">${cards}</div>
         </div>`;
@@ -1439,6 +1451,7 @@ function render() {
 
     if (!catCount) return;
     total += catCount;
+    catCounts[cat] = catCount;
 
     html += `
       <section class="cat-section" data-cat="${cat}">
@@ -1460,6 +1473,36 @@ function render() {
   }
 
   document.getElementById('main').innerHTML = html;
+
+  // Update filter chip counts
+  updateChipCounts(catCounts);
+}
+
+function updateChipCounts(catCounts) {
+  // Calculate total for "All categories"
+  const total = Object.values(catCounts).reduce((sum, count) => sum + count, 0);
+
+  document.querySelectorAll('.chip').forEach(chip => {
+    const cat = chip.dataset.cat;
+    const currentText = chip.textContent.trim();
+
+    if (cat === 'all') {
+      // Update "All categories" chip
+      if (!currentText.includes('(')) {
+        chip.innerHTML = chip.innerHTML.replace(/All categories/, `All categories (${total})`);
+      } else {
+        chip.innerHTML = chip.innerHTML.replace(/\(\d+\)/, `(${total})`);
+      }
+    } else if (catCounts[cat]) {
+      // Update category chips with counts
+      const catLabel = CATS[cat].label;
+      if (!currentText.includes('(')) {
+        chip.innerHTML = chip.innerHTML.replace(catLabel, `${catLabel} (${catCounts[cat]})`);
+      } else {
+        chip.innerHTML = chip.innerHTML.replace(/\(\d+\)/, `(${catCounts[cat]})`);
+      }
+    }
+  });
 }
 
 // Filter chips
