@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Awesome Agent Skills — Visual Directory</title>
+<style>
+  :root {
+    --pm: #6366f1; --marketing: #f59e0b; --design: #ec4899; --frontend: #06b6d4;
+    --backend: #10b981; --ai: #8b5cf6; --mobile: #f97316; --security: #ef4444;
+    --data: #14b8a6; --monitoring: #3b82f6; --payments: #22c55e; --web3: #a855f7;
+    --productivity: #64748b; --cloud: #0ea5e9; --devtools: #78716c;
+    --bg: #0f0f13; --card: #18181f; --border: rgba(255,255,255,0.07);
+    --text: #e4e4f0; --muted: #6b7280;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+  /* Hero */
+  .hero { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 60px 24px 40px; text-align: center; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.15) 0%, transparent 70%); pointer-events: none; }
+  .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; letter-spacing: -0.03em; background: linear-gradient(135deg, #fff 30%, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 12px; }
+  .hero p { color: #94a3b8; font-size: 1.1rem; max-width: 600px; margin: 0 auto 32px; }
+  .stats-row { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat-num { font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, #a5b4fc, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; }
+  .stat-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+
+  /* Search + Filters */
+  .controls { position: sticky; top: 0; z-index: 100; background: rgba(15,15,19,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 16px 24px; }
+  .controls-inner { max-width: 1400px; margin: 0 auto; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .search-wrap { flex: 1; min-width: 220px; position: relative; }
+  .search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  #search { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px 10px 38px; color: var(--text); font-size: 0.9rem; outline: none; transition: border-color .2s; }
+  #search:focus { border-color: var(--pm); }
+  #search::placeholder { color: var(--muted); }
+  .filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tab { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 0.78rem; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .tab:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .tab.active { color: #fff; font-weight: 600; }
+  .tab[data-cat="all"].active { background: var(--pm); border-color: var(--pm); }
+  .tab[data-cat="pm"].active { background: var(--pm); border-color: var(--pm); }
+  .tab[data-cat="marketing"].active { background: var(--marketing); border-color: var(--marketing); color: #000; }
+  .tab[data-cat="design"].active { background: var(--design); border-color: var(--design); }
+  .tab[data-cat="frontend"].active { background: var(--frontend); border-color: var(--frontend); color: #000; }
+  .tab[data-cat="backend"].active { background: var(--backend); border-color: var(--backend); color: #000; }
+  .tab[data-cat="ai"].active { background: var(--ai); border-color: var(--ai); }
+  .tab[data-cat="mobile"].active { background: var(--mobile); border-color: var(--mobile); color: #000; }
+  .tab[data-cat="security"].active { background: var(--security); border-color: var(--security); }
+  .tab[data-cat="data"].active { background: var(--data); border-color: var(--data); color: #000; }
+  .tab[data-cat="monitoring"].active { background: var(--monitoring); border-color: var(--monitoring); }
+  .tab[data-cat="payments"].active { background: var(--payments); border-color: var(--payments); color: #000; }
+  .tab[data-cat="web3"].active { background: var(--web3); border-color: var(--web3); }
+  .tab[data-cat="productivity"].active { background: var(--productivity); border-color: var(--productivity); }
+  .tab[data-cat="cloud"].active { background: var(--cloud); border-color: var(--cloud); color: #000; }
+
+  /* Main */
+  .main { max-width: 1400px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  /* Category section */
+  .category-section { margin-bottom: 48px; }
+  .cat-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .cat-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .cat-title { font-size: 1.3rem; font-weight: 700; }
+  .cat-count { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 2px 10px; font-size: 0.75rem; color: var(--muted); }
+
+  /* Provider group */
+  .provider-group { margin-bottom: 24px; }
+  .provider-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .provider-label span { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 2px 8px; }
+
+  /* Skill grid */
+  .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; }
+
+  /* Skill card */
+  .skill-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; transition: all .18s; cursor: pointer; text-decoration: none; }
+  .skill-card:hover { border-color: rgba(255,255,255,0.18); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  .skill-name { font-size: 0.82rem; font-weight: 600; font-family: 'SF Mono', 'Fira Code', monospace; color: #a5b4fc; display: flex; align-items: center; gap: 6px; }
+  .skill-name .cat-tag { display: inline-block; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .skill-desc { font-size: 0.83rem; color: #94a3b8; line-height: 1.45; }
+  .skill-card:hover .skill-name { color: #c7d2fe; }
+
+  /* PM top banner */
+  .pm-banner { background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(124,58,237,0.08)); border: 1px solid rgba(99,102,241,0.3); border-radius: 16px; padding: 20px 24px; margin-bottom: 32px; display: flex; align-items: center; gap: 16px; }
+  .pm-banner-icon { font-size: 2.5rem; }
+  .pm-banner-text h2 { font-size: 1rem; font-weight: 700; color: #a5b4fc; margin-bottom: 4px; }
+  .pm-banner-text p { font-size: 0.85rem; color: #64748b; }
+
+  /* Sub-section headers inside PM */
+  .sub-section { margin-bottom: 16px; }
+  .sub-section-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); border-left: 3px solid var(--pm); padding-left: 10px; margin-bottom: 10px; }
+
+  /* No results */
+  .no-results { text-align: center; padding: 80px 24px; color: var(--muted); }
+  .no-results p { font-size: 1.1rem; margin-top: 16px; }
+
+  /* Hidden */
+  .hidden { display: none !important; }
+
+  @media (max-width: 600px) {
+    .hero { padding: 40px 16px 28px; }
+    .stats-row { gap: 20px; }
+    .skills-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Awesome Agent Skills</h1>
+  <p>1,100+ hand-picked skills from leading engineering teams. Compatible with Claude Code, Cursor, GitHub Copilot, Gemini CLI &amp; more.</p>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-num">1,100+</div><div class="stat-label">Total Skills</div></div>
+    <div class="stat"><div class="stat-num">111</div><div class="stat-label">PM Skills</div></div>
+    <div class="stat"><div class="stat-num">43</div><div class="stat-label">Marketing Skills</div></div>
+    <div class="stat"><div class="stat-num">50+</div><div class="stat-label">Contributors</div></div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="search-wrap">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input id="search" type="text" placeholder="Search skills…" autocomplete="off">
+    </div>
+    <div class="filter-tabs">
+      <button class="tab active" data-cat="all">All</button>
+      <button class="tab" data-cat="pm">Product Management</button>
+      <button class="tab" data-cat="marketing">Marketing</button>
+      <button class="tab" data-cat="design">Design</button>
+      <button class="tab" data-cat="frontend">Frontend</button>
+      <button class="tab" data-cat="backend">Backend</button>
+      <button class="tab" data-cat="ai">AI / ML</button>
+      <button class="tab" data-cat="mobile">Mobile</button>
+      <button class="tab" data-cat="security">Security</button>
+      <button class="tab" data-cat="data">Data</button>
+      <button class="tab" data-cat="monitoring">Monitoring</button>
+      <button class="tab" data-cat="payments">Payments</button>
+      <button class="tab" data-cat="web3">Web3</button>
+      <button class="tab" data-cat="productivity">Productivity</button>
+      <button class="tab" data-cat="cloud">Cloud</button>
+    </div>
+  </div>
+</div>
+
+<div class="main" id="main"></div>
+
+<script>
+const CAT_COLORS = {
+  pm:'#6366f1', marketing:'#f59e0b', design:'#ec4899', frontend:'#06b6d4',
+  backend:'#10b981', ai:'#8b5cf6', mobile:'#f97316', security:'#ef4444',
+  data:'#14b8a6', monitoring:'#3b82f6', payments:'#22c55e', web3:'#a855f7',
+  productivity:'#64748b', cloud:'#0ea5e9', devtools:'#78716c'
+};
+
+const DATA = [
+  // ── PRODUCT MANAGEMENT ─────────────────────────────────────────────
+  {cat:'pm', provider:'Dean Peters', sub:'Component Skills',
+   skills:[
+    ['deanpeters/acquisition-channel-advisor','Evaluate channels using unit economics and recommend scale/test/kill decisions','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/acquisition-channel-advisor'],
+    ['deanpeters/ai-shaped-readiness-advisor','Assess automation vs. redesign opportunities across five competencies','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/ai-shaped-readiness-advisor'],
+    ['deanpeters/altitude-horizon-framework','Navigate the PM→Director mindset shift covering scope, time horizons, and failure modes','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/altitude-horizon-framework'],
+    ['deanpeters/business-health-diagnostic','Diagnose SaaS health, identify red flags, and prioritize recovery actions','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/business-health-diagnostic'],
+    ['deanpeters/company-research','Deep-dive competitor or company analysis','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/company-research'],
+    ['deanpeters/customer-journey-map','Map customer experience across touchpoints using the NNGroup framework','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/customer-journey-map'],
+    ['deanpeters/eol-message','Communicate product or feature deprecation gracefully','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/eol-message'],
+    ['deanpeters/epic-hypothesis','Turn initiatives into testable hypotheses with measurable success metrics','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/epic-hypothesis'],
+    ['deanpeters/finance-metrics-quickref','Reference guide for 32+ SaaS finance metrics with formulas and benchmarks','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/finance-metrics-quickref'],
+    ['deanpeters/jobs-to-be-done','Understand customer objectives using the JTBD framework','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/jobs-to-be-done'],
+    ['deanpeters/pestel-analysis','Analyze external factors across Political, Economic, Social, Tech, Environmental, and Legal dimensions','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/pestel-analysis'],
+    ['deanpeters/pol-probe','Define lightweight validation experiments to test hypotheses','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/pol-probe'],
+    ['deanpeters/positioning-statement','Define target audience, problem solved, and differentiation using Geoffrey Moore\'s framework','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/positioning-statement'],
+    ['deanpeters/press-release','Clarify product vision with a future press release using Amazon\'s Working Backwards method','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/press-release'],
+    ['deanpeters/problem-statement','Frame customer problems with evidence before jumping to solutions','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/problem-statement'],
+    ['deanpeters/proto-persona','Create hypothesis-driven personas before conducting full research','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/proto-persona'],
+    ['deanpeters/recommendation-canvas','Document AI-powered product recommendations','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/recommendation-canvas'],
+    ['deanpeters/saas-economics-efficiency-metrics','Calculate unit economics and capital efficiency including CAC, LTV, payback, and Rule of 40','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/saas-economics-efficiency-metrics'],
+    ['deanpeters/saas-revenue-growth-metrics','Track revenue, retention, and growth metrics including MRR/ARR, churn, NRR, and expansion','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/saas-revenue-growth-metrics'],
+    ['deanpeters/storyboard','Visualize user journeys with 6-frame narrative storyboards','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/storyboard'],
+    ['deanpeters/user-story','Write user stories with acceptance criteria using Mike Cohn and Gherkin formats','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/user-story'],
+    ['deanpeters/user-story-mapping','Organize stories by user workflow using Jeff Patton\'s story mapping approach','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/user-story-mapping'],
+    ['deanpeters/user-story-splitting','Break down large stories using 8 proven splitting patterns','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/user-story-splitting'],
+  ]},
+  {cat:'pm', provider:'Dean Peters', sub:'Interactive Skills',
+   skills:[
+    ['deanpeters/context-engineering-advisor','Diagnose context stuffing vs. engineering and guide memory and retrieval design','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/context-engineering-advisor'],
+    ['deanpeters/customer-journey-mapping-workshop','Guide journey mapping sessions with pain point identification','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/customer-journey-mapping-workshop'],
+    ['deanpeters/director-readiness-advisor','Coach the PM→Director transition across four key situations','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/director-readiness-advisor'],
+    ['deanpeters/discovery-interview-prep','Plan customer interviews using Mom Test style based on research goals','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/discovery-interview-prep'],
+    ['deanpeters/epic-breakdown-advisor','Split epics into stories using Richard Lawrence\'s 9 splitting patterns','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/epic-breakdown-advisor'],
+    ['deanpeters/feature-investment-advisor','Evaluate features using ROI and strategic value scoring','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/feature-investment-advisor'],
+    ['deanpeters/finance-based-pricing-advisor','Evaluate pricing changes using financial impact analysis','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/finance-based-pricing-advisor'],
+    ['deanpeters/lean-ux-canvas','Set up hypothesis-driven planning using Jeff Gothelf\'s Lean UX Canvas v2','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/lean-ux-canvas'],
+    ['deanpeters/opportunity-solution-tree','Generate opportunities and solutions and recommend proof-of-concept tests','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/opportunity-solution-tree'],
+    ['deanpeters/pol-probe-advisor','Recommend prototype type: Feasibility, Task-Focused, Narrative, Synthetic, or Vibe','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/pol-probe-advisor'],
+    ['deanpeters/positioning-workshop','Guide positioning definition with adaptive discovery questions','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/positioning-workshop'],
+    ['deanpeters/prioritization-advisor','Recommend the right prioritization framework (RICE, ICE, Kano, etc.) for your situation','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/prioritization-advisor'],
+    ['deanpeters/problem-framing-canvas','Lead through MITRE Problem Framing: Look Inward, Outward, and Reframe','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/problem-framing-canvas'],
+    ['deanpeters/tam-sam-som-calculator','Project market size with real-world data and citations','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/tam-sam-som-calculator'],
+    ['deanpeters/user-story-mapping-workshop','Walk through creating story maps with backbone and release slices','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/user-story-mapping-workshop'],
+    ['deanpeters/vp-cpo-readiness-advisor','Coach the Director→VP/CPO transition including a CEO interview framework','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/vp-cpo-readiness-advisor'],
+    ['deanpeters/workshop-facilitation','Add step-by-step facilitation with numbered recommendations to any workshop','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/workshop-facilitation'],
+  ]},
+  {cat:'pm', provider:'Dean Peters', sub:'Workflow Skills',
+   skills:[
+    ['deanpeters/discovery-process','Full discovery cycle: frame problem → research → synthesize → validate (3–4 weeks)','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/discovery-process'],
+    ['deanpeters/executive-onboarding-playbook','30-60-90 day diagnostic playbook for VP/CPO onboarding transitions','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/executive-onboarding-playbook'],
+    ['deanpeters/prd-development','Structured PRD process: problem → personas → solution → metrics → stories (2–4 days)','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/prd-development'],
+    ['deanpeters/product-strategy-session','Full strategy session: positioning → framing → exploration → roadmap (2–4 weeks)','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/product-strategy-session'],
+    ['deanpeters/roadmap-planning','Strategic roadmap process: inputs → epics → prioritize → sequence → communicate (1–2 weeks)','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/roadmap-planning'],
+    ['deanpeters/skill-authoring-workflow','Meta workflow for authoring skills: choose path → validate → update docs → package','https://github.com/deanpeters/Product-Manager-Skills/tree/main/skills/skill-authoring-workflow'],
+  ]},
+  {cat:'pm', provider:'Paweł Huryn', sub:'Data Analytics',
+   skills:[
+    ['phuryn/ab-test-analysis','Analyze A/B test results with statistical significance and recommendations','https://github.com/phuryn/pm-skills/tree/main/pm-data-analytics/skills/ab-test-analysis'],
+    ['phuryn/cohort-analysis','Cohort retention curves, feature adoption, and segment insights','https://github.com/phuryn/pm-skills/tree/main/pm-data-analytics/skills/cohort-analysis'],
+    ['phuryn/sql-queries','Generate SQL queries from natural language across major dialects','https://github.com/phuryn/pm-skills/tree/main/pm-data-analytics/skills/sql-queries'],
+  ]},
+  {cat:'pm', provider:'Paweł Huryn', sub:'Execution',
+   skills:[
+    ['phuryn/brainstorm-okrs','Brainstorm team OKRs aligned with company objectives','https://github.com/phuryn/pm-skills/tree/main/pm-execution/skills/brainstorm-okrs'],
+    ['phuryn/create-prd','Create a PRD with 8-section template covering problem to release','https://github.com/phuryn/pm-skills/tree/main/pm-execution/skills/create-prd'],
+    ['phuryn/dummy-dataset','Generate realistic dummy datasets in CSV, JSON, or SQL','https://github.com/phuryn/pm-skills/tree/main/pm-execution/skills/dummy-dataset'],
+    ['phuryn/job-stories','Create job stories with acceptance criteria in JTBD format','https://github.com/phuryn/pm-skills/tree/main/pm-execution/skills/job-stories'],
+    ['phuryn/outcome-roadmap','Transform output roadmaps into outcome-focused strategic plans','https://github.com/phuryn/pm-skills/tree/main/pm-execution/skills/outcome-roadmap'],
+    ['phuryn/pre-mortem','Run pre-mortem risk analysis on PRDs and launch plans','https://github.com/phuryn/pm-skills/tree/main/pm-execution/skills/pre-mortem'],
+    ['phuryn/prioritization-frameworks','Reference guide to 9 prioritization frameworks with templates','https://github.com/phuryn/pm-skills/tree/main/pm-execution/skills/prioritization-frameworks'],
+    ['phuryn/release-notes','Generate user-facing release notes from tickets or changelogs','https://github.com/phuryn/pm-skills/tree/main/pm-execution/skills/release-notes'],
+    ['phuryn/retro','Facilitate structured sprint retrospectives with action items','https://github.com/phuryn/pm-skills/tree/main/pm-execution/skills/retro'],
+    ['phuryn/sprint-plan','Plan sprints with capacity, story selection, and risk mapping','https://github.com/phuryn/pm-skills/tree/main/pm-execution/skills/sprint-plan'],
+    ['phuryn/stakeholder-map','Build stakeholder maps with power/interest grid and comms plan','https://github.com/phuryn/pm-skills/tree/main/pm-execution/skills/stakeholder-map'],
+    ['phuryn/summarize-meeting','Summarize meeting transcripts into structured notes and actions','https://github.com/phuryn/pm-skills/tree/main/pm-execution/skills/summarize-meeting'],
+    ['phuryn/test-scenarios','Create comprehensive test scenarios from user stories','https://github.com/phuryn/pm-skills/tree/main/pm-execution/skills/test-scenarios'],
+    ['phuryn/user-stories','Create INVEST-compliant user stories with 3 C\'s structure','https://github.com/phuryn/pm-skills/tree/main/pm-execution/skills/user-stories'],
+    ['phuryn/wwas','Create backlog items in Why-What-Acceptance format','https://github.com/phuryn/pm-skills/tree/main/pm-execution/skills/wwas'],
+  ]},
+  {cat:'pm', provider:'Paweł Huryn', sub:'Go-to-Market',
+   skills:[
+    ['phuryn/beachhead-segment','Identify the first beachhead market segment for product launch','https://github.com/phuryn/pm-skills/tree/main/pm-go-to-market/skills/beachhead-segment'],
+    ['phuryn/competitive-battlecard','Create sales-ready battlecards against specific competitors','https://github.com/phuryn/pm-skills/tree/main/pm-go-to-market/skills/competitive-battlecard'],
+    ['phuryn/growth-loops','Identify growth loops across 5 flywheel types for traction','https://github.com/phuryn/pm-skills/tree/main/pm-go-to-market/skills/growth-loops'],
+    ['phuryn/gtm-motions','Identify best GTM motions across 7 types including PLG and ABM','https://github.com/phuryn/pm-skills/tree/main/pm-go-to-market/skills/gtm-motions'],
+    ['phuryn/gtm-strategy','Create GTM strategy with channels, messaging, and launch timeline','https://github.com/phuryn/pm-skills/tree/main/pm-go-to-market/skills/gtm-strategy'],
+    ['phuryn/ideal-customer-profile','Identify ICP with demographics, behaviors, and JTBD','https://github.com/phuryn/pm-skills/tree/main/pm-go-to-market/skills/ideal-customer-profile'],
+  ]},
+  {cat:'pm', provider:'Paweł Huryn', sub:'Market Research',
+   skills:[
+    ['phuryn/competitor-analysis','Analyze competitors with strengths, weaknesses, and differentiation','https://github.com/phuryn/pm-skills/tree/main/pm-market-research/skills/competitor-analysis'],
+    ['phuryn/customer-journey-map','Map customer journeys with touchpoints, emotions, and opportunities','https://github.com/phuryn/pm-skills/tree/main/pm-market-research/skills/customer-journey-map'],
+    ['phuryn/market-segments','Identify 3–5 customer segments with JTBD and product fit','https://github.com/phuryn/pm-skills/tree/main/pm-market-research/skills/market-segments'],
+    ['phuryn/market-sizing','Estimate TAM, SAM, SOM with top-down and bottom-up approaches','https://github.com/phuryn/pm-skills/tree/main/pm-market-research/skills/market-sizing'],
+    ['phuryn/sentiment-analysis','Analyze user feedback with sentiment scores and JTBD insights','https://github.com/phuryn/pm-skills/tree/main/pm-market-research/skills/sentiment-analysis'],
+    ['phuryn/user-personas','Create 3 user personas with JTBD, pains, and gains','https://github.com/phuryn/pm-skills/tree/main/pm-market-research/skills/user-personas'],
+    ['phuryn/user-segmentation','Segment users by behavior, JTBD, and needs from feedback data','https://github.com/phuryn/pm-skills/tree/main/pm-market-research/skills/user-segmentation'],
+  ]},
+  {cat:'pm', provider:'Paweł Huryn', sub:'Product Discovery',
+   skills:[
+    ['phuryn/analyze-feature-requests','Prioritize feature requests by theme, impact, effort, and risk','https://github.com/phuryn/pm-skills/tree/main/pm-product-discovery/skills/analyze-feature-requests'],
+    ['phuryn/brainstorm-experiments-existing','Design experiments to test assumptions for existing products','https://github.com/phuryn/pm-skills/tree/main/pm-product-discovery/skills/brainstorm-experiments-existing'],
+    ['phuryn/brainstorm-experiments-new','Design lean pretotypes for new product validation','https://github.com/phuryn/pm-skills/tree/main/pm-product-discovery/skills/brainstorm-experiments-new'],
+    ['phuryn/brainstorm-ideas-existing','Brainstorm product ideas from PM, Designer, Engineer perspectives','https://github.com/phuryn/pm-skills/tree/main/pm-product-discovery/skills/brainstorm-ideas-existing'],
+    ['phuryn/brainstorm-ideas-new','Brainstorm feature ideas for new products in early discovery','https://github.com/phuryn/pm-skills/tree/main/pm-product-discovery/skills/brainstorm-ideas-new'],
+    ['phuryn/identify-assumptions-existing','Identify risky assumptions across Value, Usability, Viability, Feasibility','https://github.com/phuryn/pm-skills/tree/main/pm-product-discovery/skills/identify-assumptions-existing'],
+    ['phuryn/identify-assumptions-new','Identify risky assumptions for new products across 8 risk categories','https://github.com/phuryn/pm-skills/tree/main/pm-product-discovery/skills/identify-assumptions-new'],
+    ['phuryn/interview-script','Create structured customer interview scripts with JTBD probing','https://github.com/phuryn/pm-skills/tree/main/pm-product-discovery/skills/interview-script'],
+    ['phuryn/metrics-dashboard','Define product metrics dashboard with sources and alert thresholds','https://github.com/phuryn/pm-skills/tree/main/pm-product-discovery/skills/metrics-dashboard'],
+    ['phuryn/opportunity-solution-tree','Build Opportunity Solution Trees based on Teresa Torres\' method','https://github.com/phuryn/pm-skills/tree/main/pm-product-discovery/skills/opportunity-solution-tree'],
+    ['phuryn/prioritize-assumptions','Prioritize assumptions with Impact × Risk matrix and experiments','https://github.com/phuryn/pm-skills/tree/main/pm-product-discovery/skills/prioritize-assumptions'],
+    ['phuryn/prioritize-features','Prioritize backlog by impact, effort, risk, and strategic alignment','https://github.com/phuryn/pm-skills/tree/main/pm-product-discovery/skills/prioritize-features'],
+    ['phuryn/summarize-interview','Summarize interview transcripts with JTBD and action items','https://github.com/phuryn/pm-skills/tree/main/pm-product-discovery/skills/summarize-interview'],
+  ]},
+  {cat:'pm', provider:'Paweł Huryn', sub:'Product Strategy',
+   skills:[
+    ['phuryn/ansoff-matrix','Ansoff Matrix analysis across 4 growth strategy quadrants','https://github.com/phuryn/pm-skills/tree/main/pm-product-strategy/skills/ansoff-matrix'],
+    ['phuryn/business-model','Generate Business Model Canvas with all 9 building blocks','https://github.com/phuryn/pm-skills/tree/main/pm-product-strategy/skills/business-model'],
+    ['phuryn/lean-canvas','Generate Lean Canvas with problem, solution, UVP, and metrics','https://github.com/phuryn/pm-skills/tree/main/pm-product-strategy/skills/lean-canvas'],
+    ['phuryn/monetization-strategy','Brainstorm 3–5 monetization strategies with validation experiments','https://github.com/phuryn/pm-skills/tree/main/pm-product-strategy/skills/monetization-strategy'],
+    ['phuryn/pestle-analysis','PESTLE analysis across Political, Economic, Social, Tech, Legal, Environmental','https://github.com/phuryn/pm-skills/tree/main/pm-product-strategy/skills/pestle-analysis'],
+    ['phuryn/porters-five-forces','Porter\'s Five Forces competitive analysis with strategic insights','https://github.com/phuryn/pm-skills/tree/main/pm-product-strategy/skills/porters-five-forces'],
+    ['phuryn/pricing-strategy','Design pricing strategies with competitive analysis and WTP estimation','https://github.com/phuryn/pm-skills/tree/main/pm-product-strategy/skills/pricing-strategy'],
+    ['phuryn/product-strategy','Create product strategy using 9-section Product Strategy Canvas','https://github.com/phuryn/pm-skills/tree/main/pm-product-strategy/skills/product-strategy'],
+    ['phuryn/product-vision','Brainstorm inspiring, achievable product vision statements','https://github.com/phuryn/pm-skills/tree/main/pm-product-strategy/skills/product-vision'],
+    ['phuryn/startup-canvas','Generate Startup Canvas combining Product Strategy and Business Model','https://github.com/phuryn/pm-skills/tree/main/pm-product-strategy/skills/startup-canvas'],
+    ['phuryn/swot-analysis','SWOT analysis with actionable recommendations per quadrant','https://github.com/phuryn/pm-skills/tree/main/pm-product-strategy/skills/swot-analysis'],
+    ['phuryn/value-proposition','Design value propositions using 6-part JTBD template','https://github.com/phuryn/pm-skills/tree/main/pm-product-strategy/skills/value-proposition'],
+  ]},
+  {cat:'pm', provider:'Paweł Huryn', sub:'Marketing & Growth',
+   skills:[
+    ['phuryn/marketing-ideas','Generate 5 creative, cost-effective marketing ideas with rationale','https://github.com/phuryn/pm-skills/tree/main/pm-marketing-growth/skills/marketing-ideas'],
+    ['phuryn/north-star-metric','Define North Star Metric and input metrics constellation','https://github.com/phuryn/pm-skills/tree/main/pm-marketing-growth/skills/north-star-metric'],
+    ['phuryn/positioning-ideas','Brainstorm positioning ideas differentiated from competitors','https://github.com/phuryn/pm-skills/tree/main/pm-marketing-growth/skills/positioning-ideas'],
+    ['phuryn/product-name','Brainstorm 5 memorable product names aligned to brand values','https://github.com/phuryn/pm-skills/tree/main/pm-marketing-growth/skills/product-name'],
+    ['phuryn/value-prop-statements','Generate value prop statements for marketing, sales, and onboarding','https://github.com/phuryn/pm-skills/tree/main/pm-marketing-growth/skills/value-prop-statements'],
+  ]},
+  {cat:'pm', provider:'Paweł Huryn', sub:'Toolkit',
+   skills:[
+    ['phuryn/draft-nda','Draft NDAs covering information types, jurisdiction, and clauses','https://github.com/phuryn/pm-skills/tree/main/pm-toolkit/skills/draft-nda'],
+    ['phuryn/grammar-check','Identify grammar and flow errors with targeted fix suggestions','https://github.com/phuryn/pm-skills/tree/main/pm-toolkit/skills/grammar-check'],
+    ['phuryn/privacy-policy','Draft privacy policies with GDPR compliance considerations','https://github.com/phuryn/pm-skills/tree/main/pm-toolkit/skills/privacy-policy'],
+    ['phuryn/review-resume','PM resume review against 10 best practices including XYZ+S formula','https://github.com/phuryn/pm-skills/tree/main/pm-toolkit/skills/review-resume'],
+  ]},
+
+  // ── MARKETING ──────────────────────────────────────────────────────
+  {cat:'marketing', provider:'Corey Haines', sub:'SaaS Marketing (31 skills)',
+   skills:[
+    ['coreyhaines31/ab-test-setup','Plan and implement A/B tests or experiments for any digital experience','https://github.com/coreyhaines31/marketingskills/tree/main/skills/ab-test-setup'],
+    ['coreyhaines31/ad-creative','Generate and iterate ad creative including headlines, descriptions, and primary text','https://github.com/coreyhaines31/marketingskills/tree/main/skills/ad-creative'],
+    ['coreyhaines31/ai-seo','Optimize content to appear in AI-generated answers and LLM search results','https://github.com/coreyhaines31/marketingskills/tree/main/skills/ai-seo'],
+    ['coreyhaines31/analytics-tracking','Set up and audit analytics tracking and measurement pipelines','https://github.com/coreyhaines31/marketingskills/tree/main/skills/analytics-tracking'],
+    ['coreyhaines31/churn-prevention','Build cancellation flows, save offers, and recover failed payments','https://github.com/coreyhaines31/marketingskills/tree/main/skills/churn-prevention'],
+    ['coreyhaines31/cold-email','Write B2B cold emails and follow-up sequences that convert','https://github.com/coreyhaines31/marketingskills/tree/main/skills/cold-email'],
+    ['coreyhaines31/competitor-alternatives','Build competitor comparison and alternative landing pages for SEO','https://github.com/coreyhaines31/marketingskills/tree/main/skills/competitor-alternatives'],
+    ['coreyhaines31/content-strategy','Plan content strategy and decide what topics and formats to prioritize','https://github.com/coreyhaines31/marketingskills/tree/main/skills/content-strategy'],
+    ['coreyhaines31/copy-editing','Edit and improve existing marketing copy for clarity and impact','https://github.com/coreyhaines31/marketingskills/tree/main/skills/copy-editing'],
+    ['coreyhaines31/copywriting','Write and rewrite marketing copy for landing pages, homepages, and ads','https://github.com/coreyhaines31/marketingskills/tree/main/skills/copywriting'],
+    ['coreyhaines31/email-sequence','Build email sequences, drip campaigns, and lifecycle email flows','https://github.com/coreyhaines31/marketingskills/tree/main/skills/email-sequence'],
+    ['coreyhaines31/form-cro','Optimize lead capture and contact forms to improve conversion','https://github.com/coreyhaines31/marketingskills/tree/main/skills/form-cro'],
+    ['coreyhaines31/free-tool-strategy','Plan and build free tools for lead generation and SEO value','https://github.com/coreyhaines31/marketingskills/tree/main/skills/free-tool-strategy'],
+    ['coreyhaines31/launch-strategy','Plan product launches, feature announcements, and go-to-market strategies','https://github.com/coreyhaines31/marketingskills/tree/main/skills/launch-strategy'],
+    ['coreyhaines31/marketing-ideas','Generate marketing strategies and campaign ideas for SaaS products','https://github.com/coreyhaines31/marketingskills/tree/main/skills/marketing-ideas'],
+    ['coreyhaines31/marketing-psychology','Apply psychological principles and behavioral science to copy and design','https://github.com/coreyhaines31/marketingskills/tree/main/skills/marketing-psychology'],
+    ['coreyhaines31/onboarding-cro','Optimize post-signup onboarding and user activation to improve time-to-value','https://github.com/coreyhaines31/marketingskills/tree/main/skills/onboarding-cro'],
+    ['coreyhaines31/page-cro','Improve conversion rates on any marketing page including homepages and landing pages','https://github.com/coreyhaines31/marketingskills/tree/main/skills/page-cro'],
+    ['coreyhaines31/paid-ads','Create and optimize paid campaigns on Google, Meta, LinkedIn, and more','https://github.com/coreyhaines31/marketingskills/tree/main/skills/paid-ads'],
+    ['coreyhaines31/paywall-upgrade-cro','Design and optimize upgrade screens, paywalls, and upsell modals','https://github.com/coreyhaines31/marketingskills/tree/main/skills/paywall-upgrade-cro'],
+    ['coreyhaines31/popup-cro','Create and optimize popups, modals, and slide-ins for conversions','https://github.com/coreyhaines31/marketingskills/tree/main/skills/popup-cro'],
+    ['coreyhaines31/pricing-strategy','Define pricing, packaging, and monetization strategy for SaaS products','https://github.com/coreyhaines31/marketingskills/tree/main/skills/pricing-strategy'],
+    ['coreyhaines31/product-marketing-context','Create and maintain a product marketing context document for consistent messaging','https://github.com/coreyhaines31/marketingskills/tree/main/skills/product-marketing-context'],
+    ['coreyhaines31/programmatic-seo','Build SEO-driven page templates for large-scale content generation','https://github.com/coreyhaines31/marketingskills/tree/main/skills/programmatic-seo'],
+    ['coreyhaines31/referral-program','Design and optimize referral, affiliate, and word-of-mouth programs','https://github.com/coreyhaines31/marketingskills/tree/main/skills/referral-program'],
+    ['coreyhaines31/revops','Streamline revenue operations, lead lifecycle, and marketing-to-sales handoff','https://github.com/coreyhaines31/marketingskills/tree/main/skills/revops'],
+    ['coreyhaines31/sales-enablement','Create pitch decks, one-pagers, objection handling docs, and demo scripts','https://github.com/coreyhaines31/marketingskills/tree/main/skills/sales-enablement'],
+    ['coreyhaines31/schema-markup','Add and optimize schema markup and structured data for better SEO','https://github.com/coreyhaines31/marketingskills/tree/main/skills/schema-markup'],
+    ['coreyhaines31/seo-audit','Audit and diagnose technical and on-page SEO issues on a site','https://github.com/coreyhaines31/marketingskills/tree/main/skills/seo-audit'],
+    ['coreyhaines31/signup-flow-cro','Optimize signup, registration, and trial activation flows for higher conversion','https://github.com/coreyhaines31/marketingskills/tree/main/skills/signup-flow-cro'],
+    ['coreyhaines31/site-architecture','Plan and restructure page hierarchy, navigation, and URL structure','https://github.com/coreyhaines31/marketingskills/tree/main/skills/site-architecture'],
+    ['coreyhaines31/social-content','Create and schedule social media content for LinkedIn, Twitter/X, and Instagram','https://github.com/coreyhaines31/marketingskills/tree/main/skills/social-content'],
+  ]},
+  {cat:'marketing', provider:'Kim Barrett', sub:'Direct-Response Advertising (12 skills)',
+   skills:[
+    ['realkimbarrett/avatar-extraction','Define exactly who the buyer is, what they want, what they\'ve tried, and what\'s driving their decisions','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/foundations/avatar-extraction'],
+    ['realkimbarrett/offer-extraction','Turn a product or service into a compelling, high-converting offer','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/foundations/offer-extraction'],
+    ['realkimbarrett/schwartz-awareness-mapper','Determine audience awareness level and the correct messaging approach','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/copy-chief/schwartz-awareness-mapper'],
+    ['realkimbarrett/mechanism-builder','Explain why your solution works and others failed with a unique mechanism','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/copy-chief/mechanism-builder'],
+    ['realkimbarrett/headline-matrix','Generate high-performing headline variations across different angles','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/copy-chief/headline-matrix'],
+    ['realkimbarrett/objection-crusher','Identify and neutralize buyer objections and hesitation','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/copy-chief/objection-crusher'],
+    ['realkimbarrett/ad-angle-multiplier','Expand a core idea into multiple distinct ad angles for creative testing','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/operator-os/ad-angle-multiplier'],
+    ['realkimbarrett/scroll-stopping-creative','Create ad concepts that stop attention in the first 3 seconds','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/operator-os/scroll-stopping-creative'],
+    ['realkimbarrett/conversion-path-builder','Design the optimal funnel from click to conversion and booked calls','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/operator-os/conversion-path-builder'],
+    ['realkimbarrett/performance-diagnosis','Diagnose why campaigns are underperforming — low conversion, high CPL, bad ads','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/operator-os/performance-diagnosis'],
+    ['realkimbarrett/full-funnel-campaign-orchestrator','Coordinate all skills to build a complete ads + funnel campaign end-to-end','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/orchestrators/full-funnel-campaign-orchestrator'],
+    ['realkimbarrett/generic-language-killer','Remove vague, corporate, or AI-sounding language and replace with clear, specific wording','https://github.com/realkimbarrett/advertising-skills/tree/main/skills/qa/generic-language-killer'],
+  ]},
+
+  // ── DESIGN ─────────────────────────────────────────────────────────
+  {cat:'design', provider:'Anthropic / Claude', sub:'17 official skills',
+   skills:[
+    ['anthropics/docx','Create, edit, and analyze Word documents','https://officialskills.sh/anthropics/skills/docx'],
+    ['anthropics/doc-coauthoring','Collaborative document editing and co-authoring','https://officialskills.sh/anthropics/skills/doc-coauthoring'],
+    ['anthropics/pptx','Create, edit, and analyze PowerPoint presentations','https://officialskills.sh/anthropics/skills/pptx'],
+    ['anthropics/xlsx','Create, edit, and analyze Excel spreadsheets','https://officialskills.sh/anthropics/skills/xlsx'],
+    ['anthropics/pdf','Extract text, create PDFs, and handle forms','https://officialskills.sh/anthropics/skills/pdf'],
+    ['anthropics/algorithmic-art','Create generative art using p5.js with seeded randomness','https://officialskills.sh/anthropics/skills/algorithmic-art'],
+    ['anthropics/canvas-design','Design visual art in PNG and PDF formats','https://officialskills.sh/anthropics/skills/canvas-design'],
+    ['anthropics/frontend-design','Frontend design and UI/UX development tools','https://officialskills.sh/anthropics/skills/frontend-design'],
+    ['anthropics/slack-gif-creator','Create animated GIFs optimized for Slack size constraints','https://officialskills.sh/anthropics/skills/slack-gif-creator'],
+    ['anthropics/theme-factory','Style artifacts with professional themes or generate custom themes','https://officialskills.sh/anthropics/skills/theme-factory'],
+    ['anthropics/web-artifacts-builder','Build complex claude.ai HTML artifacts with React and Tailwind','https://officialskills.sh/anthropics/skills/web-artifacts-builder'],
+    ['anthropics/mcp-builder','Create MCP servers to integrate external APIs and services','https://officialskills.sh/anthropics/skills/mcp-builder'],
+    ['anthropics/webapp-testing','Test local web applications using Playwright','https://officialskills.sh/anthropics/skills/webapp-testing'],
+    ['anthropics/brand-guidelines','Apply Anthropic\'s brand colors and typography to artifacts','https://officialskills.sh/anthropics/skills/brand-guidelines'],
+    ['anthropics/internal-comms','Write status reports, newsletters, and FAQs','https://officialskills.sh/anthropics/skills/internal-comms'],
+    ['anthropics/skill-creator','Guide for creating skills that extend Claude\'s capabilities','https://officialskills.sh/anthropics/skills/skill-creator'],
+    ['anthropics/template','Basic template for creating new skills','https://officialskills.sh/anthropics/skills/template'],
+  ]},
+  {cat:'design', provider:'Figma', sub:'7 skills',
+   skills:[
+    ['figma/figma-implement-design','Translate Figma designs into production-ready application code with 1:1 fidelity','https://officialskills.sh/figma/skills/figma-implement-design'],
+    ['figma/figma-mcp','Use the Figma MCP server to fetch design context and translate nodes into code','https://officialskills.sh/figma/skills/figma-mcp'],
+    ['figma/figma-connect','Connect design system components to code components','https://officialskills.sh/figma/skills/figma-connect'],
+    ['figma/figma-make','Design and prototype with Figma Make','https://officialskills.sh/figma/skills/figma-make'],
+    ['figma/figma-design-system','Create and manage design system libraries in Figma','https://officialskills.sh/figma/skills/figma-design-system'],
+    ['figma/figma-create-file','Create Figma files programmatically','https://officialskills.sh/figma/skills/figma-create-file'],
+    ['figma/figma-best-practices','Figma design best practices and workflow patterns','https://officialskills.sh/figma/skills/figma-best-practices'],
+  ]},
+  {cat:'design', provider:'Google Labs (Stitch)', sub:'6 skills',
+   skills:[
+    ['google-labs-code/design-md','Create and manage DESIGN.md files','https://officialskills.sh/google-labs-code/skills/design-md'],
+    ['google-labs-code/enhance-prompt','Improve prompts with design specs and UI/UX vocabulary','https://officialskills.sh/google-labs-code/skills/enhance-prompt'],
+    ['google-labs-code/react-components','Stitch to React components conversion','https://officialskills.sh/google-labs-code/skills/react-components'],
+    ['google-labs-code/remotion','Generate walkthrough videos from Stitch app designs','https://officialskills.sh/google-labs-code/skills/remotion'],
+    ['google-labs-code/shadcn-ui','Build UI components with shadcn/ui','https://officialskills.sh/google-labs-code/skills/shadcn-ui'],
+    ['google-labs-code/stitch-loop','Iterative design-to-code feedback loop','https://officialskills.sh/google-labs-code/skills/stitch-loop'],
+  ]},
+  {cat:'design', provider:'Sanity', sub:'4 skills',
+   skills:[
+    ['sanity-io/sanity-best-practices','Best practices for Sanity Studio, GROQ queries, and content workflows','https://officialskills.sh/sanity-io/skills/sanity-best-practices'],
+    ['sanity-io/content-modeling-best-practices','Guidelines for designing scalable content models in Sanity','https://officialskills.sh/sanity-io/skills/content-modeling-best-practices'],
+    ['sanity-io/seo-aeo-best-practices','SEO and answer engine optimization patterns for content sites','https://officialskills.sh/sanity-io/skills/seo-aeo-best-practices'],
+    ['sanity-io/content-experimentation-best-practices','Content A/B testing and experimentation workflows','https://officialskills.sh/sanity-io/skills/content-experimentation-best-practices'],
+  ]},
+  {cat:'design', provider:'WordPress', sub:'12 skills',
+   skills:[
+    ['WordPress/wp-block-development','Gutenberg blocks: block.json, attributes, rendering, deprecations','https://officialskills.sh/WordPress/skills/wp-block-development'],
+    ['WordPress/wp-plugin-development','Plugin architecture, hooks, settings API, security','https://officialskills.sh/WordPress/skills/wp-plugin-development'],
+    ['WordPress/wp-theme-development','Block themes, theme.json, FSE, template parts','https://officialskills.sh/WordPress/skills/wp-theme-development'],
+    ['WordPress/wp-rest-api','REST API endpoints, authentication, custom routes','https://officialskills.sh/WordPress/skills/wp-rest-api'],
+    ['WordPress/wp-performance','Core Web Vitals, caching, image optimization','https://officialskills.sh/WordPress/skills/wp-performance'],
+    ['WordPress/wp-security','Hardening, user roles, sanitization, and input escaping','https://officialskills.sh/WordPress/skills/wp-security'],
+    ['WordPress/wp-gutenberg','Advanced Gutenberg block development patterns','https://officialskills.sh/WordPress/skills/wp-gutenberg'],
+    ['WordPress/wp-woocommerce','WooCommerce hooks, custom extensions, checkout flows','https://officialskills.sh/WordPress/skills/wp-woocommerce'],
+    ['WordPress/wp-multisite','Multisite network setup and management','https://officialskills.sh/WordPress/skills/wp-multisite'],
+    ['WordPress/wp-cli','WP-CLI commands and automation scripts','https://officialskills.sh/WordPress/skills/wp-cli'],
+    ['WordPress/wp-testing','PHPUnit for WordPress plugin/theme testing','https://officialskills.sh/WordPress/skills/wp-testing'],
+    ['WordPress/wp-patterns','Block patterns and reusable components','https://officialskills.sh/WordPress/skills/wp-patterns'],
+  ]},
+  {cat:'design', provider:'Remotion / Typefully', sub:'2 skills',
+   skills:[
+    ['remotion-dev/remotion','Programmatic video creation with React','https://officialskills.sh/remotion-dev/skills/remotion'],
+    ['typefully/typefully','Create, schedule, and publish social media content across X, LinkedIn, Threads, Bluesky, and Mastodon','https://officialskills.sh/typefully/skills/typefully'],
+  ]},
+
+  // ── FRONTEND ───────────────────────────────────────────────────────
+  {cat:'frontend', provider:'Vercel Engineering', sub:'7 skills',
+   skills:[
+    ['vercel-labs/react-best-practices','React best practices and patterns','https://officialskills.sh/vercel-labs/skills/react-best-practices'],
+    ['vercel-labs/web-design-guidelines','Web design guidelines and standards','https://officialskills.sh/vercel-labs/skills/web-design-guidelines'],
+    ['vercel-labs/composition-patterns','React component composition and reusable patterns','https://officialskills.sh/vercel-labs/skills/composition-patterns'],
+    ['vercel-labs/next-best-practices','Next.js best practices and recommended patterns','https://officialskills.sh/vercel-labs/skills/next-best-practices'],
+    ['vercel-labs/next-cache-components','Caching strategies and cache-aware components in Next.js','https://officialskills.sh/vercel-labs/skills/next-cache-components'],
+    ['vercel-labs/next-upgrade','Upgrade Next.js projects to newer versions','https://officialskills.sh/vercel-labs/skills/next-upgrade'],
+    ['vercel-labs/react-native-skills','React Native best practices and performance guidelines','https://officialskills.sh/vercel-labs/skills/react-native-skills'],
+  ]},
+  {cat:'frontend', provider:'Angular', sub:'2 skills',
+   skills:[
+    ['angular/angular-developer','Generate Angular code and architectural guidance for components, services, reactivity','https://github.com/angular/skills'],
+    ['angular/angular-new-app','Create new Angular apps using CLI with modern best practices','https://github.com/angular/skills'],
+  ]},
+  {cat:'frontend', provider:'VoltAgent', sub:'4 skills',
+   skills:[
+    ['voltagent/create-voltagent','Project setup guide with CLI and manual steps','https://officialskills.sh/voltagent/skills/create-voltagent'],
+    ['voltagent/voltagent-best-practices','Architecture and usage patterns for agents, workflows, memory, and servers','https://officialskills.sh/voltagent/skills/voltagent-best-practices'],
+    ['voltagent/voltagent-core-reference','Reference for the VoltAgent class options and lifecycle methods','https://officialskills.sh/voltagent/skills/voltagent-core-reference'],
+    ['voltagent/voltagent-docs-bundle','Lookup embedded docs from @voltagent/core for version-matched documentation','https://officialskills.sh/voltagent/skills/voltagent-docs-bundle'],
+  ]},
+  {cat:'frontend', provider:'Composio', sub:'1 skill',
+   skills:[
+    ['composiohq/composio','Connect AI agents to 1000+ external apps with managed authentication','https://officialskills.sh/composiohq/skills/composio'],
+  ]},
+
+  // ── BACKEND ────────────────────────────────────────────────────────
+  {cat:'backend', provider:'Cloudflare', sub:'8 skills',
+   skills:[
+    ['cloudflare/agents-sdk','Build stateful AI agents with scheduling, RPC, and MCP servers','https://officialskills.sh/cloudflare/skills/agents-sdk'],
+    ['cloudflare/cloudflare','Comprehensive platform skill covering Workers, Pages, storage, AI, networking, security, and IaC','https://officialskills.sh/cloudflare/skills/cloudflare'],
+    ['cloudflare/cloudflare-email-service','Send transactional email and route inbound mail with Cloudflare Email','https://officialskills.sh/cloudflare/skills/cloudflare-email-service'],
+    ['cloudflare/durable-objects','Stateful coordination with RPC, SQLite, and WebSockets','https://officialskills.sh/cloudflare/skills/durable-objects'],
+    ['cloudflare/sandbox-sdk','Build sandboxed applications for secure, isolated code execution on Workers','https://officialskills.sh/cloudflare/skills/sandbox-sdk'],
+    ['cloudflare/web-perf','Audit Core Web Vitals and render-blocking resources','https://officialskills.sh/cloudflare/skills/web-perf'],
+    ['cloudflare/workers-best-practices','Review and author Workers code against production best practices','https://officialskills.sh/cloudflare/skills/workers-best-practices'],
+    ['cloudflare/wrangler','Deploy and manage Workers, KV, R2, D1, Vectorize, Queues, Workflows','https://officialskills.sh/cloudflare/skills/wrangler'],
+  ]},
+  {cat:'backend', provider:'Netlify', sub:'12 skills',
+   skills:[
+    ['netlify/netlify-functions','Build serverless API endpoints and background tasks','https://officialskills.sh/netlify/skills/netlify-functions'],
+    ['netlify/netlify-edge-functions','Low-latency edge middleware and geolocation logic','https://officialskills.sh/netlify/skills/netlify-edge-functions'],
+    ['netlify/netlify-blobs','Key-value object storage for files and data','https://officialskills.sh/netlify/skills/netlify-blobs'],
+    ['netlify/netlify-db','Managed Postgres with deploy preview branching','https://officialskills.sh/netlify/skills/netlify-db'],
+    ['netlify/netlify-image-cdn','Optimize and transform images via CDN','https://officialskills.sh/netlify/skills/netlify-image-cdn'],
+    ['netlify/netlify-forms','HTML form handling with spam filtering','https://officialskills.sh/netlify/skills/netlify-forms'],
+    ['netlify/netlify-frameworks','Deploy web frameworks with SSR support','https://officialskills.sh/netlify/skills/netlify-frameworks'],
+    ['netlify/netlify-caching','Configure CDN caching and cache purging','https://officialskills.sh/netlify/skills/netlify-caching'],
+    ['netlify/netlify-config','Reference for netlify.toml site configuration','https://officialskills.sh/netlify/skills/netlify-config'],
+    ['netlify/netlify-cli-and-deploy','CLI setup, local dev, and deployment workflows','https://officialskills.sh/netlify/skills/netlify-cli-and-deploy'],
+    ['netlify/netlify-deploy','Automated deployment workflow for Netlify sites','https://officialskills.sh/netlify/skills/netlify-deploy'],
+    ['netlify/netlify-ai-gateway','Access AI models via unified gateway endpoint','https://officialskills.sh/netlify/skills/netlify-ai-gateway'],
+  ]},
+  {cat:'backend', provider:'HashiCorp (Terraform)', sub:'11 skills',
+   skills:[
+    ['hashicorp/azure-verified-modules','Azure Verified Modules (AVM) certification standards for Terraform modules','https://officialskills.sh/hashicorp/skills/azure-verified-modules'],
+    ['hashicorp/new-terraform-provider','Scaffold a new Terraform provider project using the Plugin Framework','https://officialskills.sh/hashicorp/skills/new-terraform-provider'],
+    ['hashicorp/provider-resources','Implement Terraform Provider resources and data sources','https://officialskills.sh/hashicorp/skills/provider-resources'],
+    ['hashicorp/provider-test-patterns','Acceptance test patterns for Terraform providers','https://officialskills.sh/hashicorp/skills/provider-test-patterns'],
+    ['hashicorp/provider-actions','Implement Terraform Provider Actions using the Plugin Framework','https://officialskills.sh/hashicorp/skills/provider-actions'],
+    ['hashicorp/run-acceptance-tests','Run acceptance tests for Terraform providers using Go\'s test runner','https://officialskills.sh/hashicorp/skills/run-acceptance-tests'],
+    ['hashicorp/refactor-module','Transform monolithic Terraform configurations into reusable modules','https://officialskills.sh/hashicorp/skills/refactor-module'],
+    ['hashicorp/terraform-search-import','Discover existing cloud resources and bulk import into Terraform state','https://officialskills.sh/hashicorp/skills/terraform-search-import'],
+    ['hashicorp/terraform-style-guide','Generate Terraform HCL code following HashiCorp\'s official style conventions','https://officialskills.sh/hashicorp/skills/terraform-style-guide'],
+    ['hashicorp/terraform-stacks','Manage infrastructure across multiple environments, regions, and cloud accounts','https://officialskills.sh/hashicorp/skills/terraform-stacks'],
+    ['hashicorp/terraform-test','Built-in testing framework for Terraform configurations with .tftest.hcl files','https://officialskills.sh/hashicorp/skills/terraform-test'],
+  ]},
+  {cat:'backend', provider:'Firecrawl', sub:'5 skills',
+   skills:[
+    ['firecrawl/firecrawl-build','Integrate Firecrawl for web search, scraping, extraction, and browser interaction','https://officialskills.sh/firecrawl/skills/firecrawl-build'],
+    ['firecrawl/firecrawl-build-interact','Multi-step Firecrawl browser flows: clicks, form fills, pagination, auth-aware navigation','https://officialskills.sh/firecrawl/skills/firecrawl-build-interact'],
+    ['firecrawl/firecrawl-build-onboarding','Set up Firecrawl credentials and SDK in a project for the first integration','https://officialskills.sh/firecrawl/skills/firecrawl-build-onboarding'],
+    ['firecrawl/firecrawl-build-scrape','Integrate Firecrawl /scrape for single-page extraction from product code','https://officialskills.sh/firecrawl/skills/firecrawl-build-scrape'],
+    ['firecrawl/firecrawl-build-search','Integrate Firecrawl /search for query-first discovery with optional content hydration','https://officialskills.sh/firecrawl/skills/firecrawl-build-search'],
+  ]},
+  {cat:'backend', provider:'Stripe', sub:'2 skills',
+   skills:[
+    ['stripe/stripe-best-practices','Best practices for building Stripe integrations','https://officialskills.sh/stripe/skills/stripe-best-practices'],
+    ['stripe/upgrade-stripe','Upgrade Stripe SDK and API versions','https://officialskills.sh/stripe/skills/upgrade-stripe'],
+  ]},
+
+  // ── AI / ML ────────────────────────────────────────────────────────
+  {cat:'ai', provider:'Google Gemini', sub:'4 skills',
+   skills:[
+    ['google-gemini/gemini-api-dev','Best practices for developing Gemini-powered apps using the Gemini API','https://officialskills.sh/google-gemini/skills/gemini-api-dev'],
+    ['google-gemini/vertex-ai-api-dev','Developing Gemini-powered apps on Google Cloud Vertex AI using the Gen AI SDK','https://officialskills.sh/google-gemini/skills/vertex-ai-api-dev'],
+    ['google-gemini/gemini-live-api-dev','Building real-time bidirectional streaming apps with the Gemini Live API','https://officialskills.sh/google-gemini/skills/gemini-live-api-dev'],
+    ['google-gemini/gemini-interactions-api','Building apps with the Gemini Interactions API for text, chat, streaming, and image generation','https://officialskills.sh/google-gemini/skills/gemini-interactions-api'],
+  ]},
+  {cat:'ai', provider:'Hugging Face', sub:'13 skills',
+   skills:[
+    ['huggingface/hf-cli','HF CLI tool for Hub operations','https://officialskills.sh/huggingface/skills/hf-cli'],
+    ['huggingface/hugging-face-dataset-viewer','Browse and query HF datasets with the Dataset Viewer API','https://officialskills.sh/huggingface/skills/hugging-face-dataset-viewer'],
+    ['huggingface/hugging-face-datasets','Create and manage datasets with configs and SQL querying','https://officialskills.sh/huggingface/skills/hugging-face-datasets'],
+    ['huggingface/hugging-face-evaluation','Model evaluation with vLLM/lighteval and eval tables','https://officialskills.sh/huggingface/skills/hugging-face-evaluation'],
+    ['huggingface/hugging-face-jobs','Run compute jobs and Python scripts on HF infrastructure','https://officialskills.sh/huggingface/skills/hugging-face-jobs'],
+    ['huggingface/hugging-face-model-trainer','Train models with TRL: SFT, DPO, GRPO, GGUF conversion','https://officialskills.sh/huggingface/skills/hugging-face-model-trainer'],
+    ['huggingface/hugging-face-paper-pages','Create and manage paper pages on HF Hub','https://officialskills.sh/huggingface/skills/hugging-face-paper-pages'],
+    ['huggingface/hugging-face-paper-publisher','Publish papers on HF Hub with model/dataset links','https://officialskills.sh/huggingface/skills/hugging-face-paper-publisher'],
+    ['huggingface/hugging-face-tool-builder','Build reusable scripts for HF API operations','https://officialskills.sh/huggingface/skills/hugging-face-tool-builder'],
+    ['huggingface/hugging-face-trackio','Track ML experiments with real-time dashboards','https://officialskills.sh/huggingface/skills/hugging-face-trackio'],
+    ['huggingface/hugging-face-vision-trainer','Train vision models on HF infrastructure','https://officialskills.sh/huggingface/skills/hugging-face-vision-trainer'],
+    ['huggingface/huggingface-gradio','Build Gradio apps and deploy to HF Spaces','https://officialskills.sh/huggingface/skills/huggingface-gradio'],
+    ['huggingface/transformers.js','Run ML models in the browser with Transformers.js','https://officialskills.sh/huggingface/skills/transformers.js'],
+  ]},
+  {cat:'ai', provider:'fal.ai', sub:'15 skills',
+   skills:[
+    ['fal-ai/image-generation','AI image generation with Flux, SDXL, and other models','https://officialskills.sh/fal-ai/skills/image-generation'],
+    ['fal-ai/video-generation','AI video creation from text and images','https://officialskills.sh/fal-ai/skills/video-generation'],
+    ['fal-ai/3d-modeling','3D model generation from images','https://officialskills.sh/fal-ai/skills/3d-modeling'],
+    ['fal-ai/audio-generation','AI audio and music generation','https://officialskills.sh/fal-ai/skills/audio-generation'],
+    ['fal-ai/image-editing','Image editing, inpainting, and outpainting','https://officialskills.sh/fal-ai/skills/image-editing'],
+    ['fal-ai/upscaling','AI-powered image and video upscaling','https://officialskills.sh/fal-ai/skills/upscaling'],
+    ['fal-ai/background-removal','Remove and replace image backgrounds','https://officialskills.sh/fal-ai/skills/background-removal'],
+    ['fal-ai/style-transfer','Neural style transfer and artistic effects','https://officialskills.sh/fal-ai/skills/style-transfer'],
+    ['fal-ai/vision-analysis','Image and video understanding and captioning','https://officialskills.sh/fal-ai/skills/vision-analysis'],
+    ['fal-ai/training','Fine-tune and train custom AI models on fal.ai','https://officialskills.sh/fal-ai/skills/training'],
+    ['fal-ai/real-time','Real-time streaming inference workflows','https://officialskills.sh/fal-ai/skills/real-time'],
+    ['fal-ai/queue-management','Manage async model inference queues','https://officialskills.sh/fal-ai/skills/queue-management'],
+    ['fal-ai/file-storage','Upload and manage files for AI workflows','https://officialskills.sh/fal-ai/skills/file-storage'],
+    ['fal-ai/webhooks','Configure event-driven model inference callbacks','https://officialskills.sh/fal-ai/skills/webhooks'],
+    ['fal-ai/face-swap','AI face swapping and manipulation','https://officialskills.sh/fal-ai/skills/face-swap'],
+  ]},
+  {cat:'ai', provider:'Replicate', sub:'1 skill',
+   skills:[
+    ['replicate/replicate','Discover, compare, and run AI models using Replicate\'s API','https://officialskills.sh/replicate/skills/replicate'],
+  ]},
+  {cat:'ai', provider:'Venice.ai', sub:'19 skills',
+   skills:[
+    ['veniceai/venice-api-overview','API basics, auth modes, pricing, and versioning','https://github.com/veniceai/skills/tree/main/skills/venice-api-overview'],
+    ['veniceai/venice-auth','API keys and wallet-based Venice authentication','https://github.com/veniceai/skills/tree/main/skills/venice-auth'],
+    ['veniceai/venice-chat','Chat completions, multimodal inputs, tools, and streaming','https://github.com/veniceai/skills/tree/main/skills/venice-chat'],
+    ['veniceai/venice-responses','OpenAI-compatible Responses API for Venice','https://github.com/veniceai/skills/tree/main/skills/venice-responses'],
+    ['veniceai/venice-embeddings','Embeddings models, dimensions, and encoding formats','https://github.com/veniceai/skills/tree/main/skills/venice-embeddings'],
+    ['veniceai/venice-image-generate','Image generation endpoints and available styles','https://github.com/veniceai/skills/tree/main/skills/venice-image-generate'],
+    ['veniceai/venice-image-edit','Image edits, upscaling, and background removal','https://github.com/veniceai/skills/tree/main/skills/venice-image-edit'],
+    ['veniceai/venice-audio-speech','Text-to-speech models, voices, formats, and streaming','https://github.com/veniceai/skills/tree/main/skills/venice-audio-speech'],
+    ['veniceai/venice-audio-music','Music generation queueing, retrieval, and completion endpoints','https://github.com/veniceai/skills/tree/main/skills/venice-audio-music'],
+    ['veniceai/venice-audio-transcription','Audio transcription models and speech-to-text options','https://github.com/veniceai/skills/tree/main/skills/venice-audio-transcription'],
+    ['veniceai/venice-video','Video generation and transcription workflows','https://github.com/veniceai/skills/tree/main/skills/venice-video'],
+    ['veniceai/venice-models','Model catalog, traits, and compatibility mappings','https://github.com/veniceai/skills/tree/main/skills/venice-models'],
+    ['veniceai/venice-characters','Character endpoints and character_slug usage','https://github.com/veniceai/skills/tree/main/skills/venice-characters'],
+    ['veniceai/venice-api-keys','API key CRUD, rate limits, and Web3 keys','https://github.com/veniceai/skills/tree/main/skills/venice-api-keys'],
+    ['veniceai/venice-billing','Balance, usage, and billing analytics endpoints','https://github.com/veniceai/skills/tree/main/skills/venice-billing'],
+    ['veniceai/venice-x402','Wallet credits and x402 payments on Base','https://github.com/veniceai/skills/tree/main/skills/venice-x402'],
+    ['veniceai/venice-crypto-rpc','JSON-RPC proxying for supported crypto networks','https://github.com/veniceai/skills/tree/main/skills/venice-crypto-rpc'],
+    ['veniceai/venice-augment','Search, scraping, and text parsing endpoints','https://github.com/veniceai/skills/tree/main/skills/venice-augment'],
+    ['veniceai/venice-errors','Error handling, retries, and API status codes','https://github.com/veniceai/skills/tree/main/skills/venice-errors'],
+  ]},
+  {cat:'ai', provider:'MiniMax', sub:'11 skills',
+   skills:[
+    ['MiniMax-AI/cli','Generate text, image, video, speech, and music via MiniMax AI','https://officialskills.sh/MiniMax-AI/skills/cli'],
+    ['MiniMax-AI/frontend-dev','Full-stack frontend with cinematic animations and AI-generated media via MiniMax API','https://officialskills.sh/MiniMax-AI/skills/frontend-dev'],
+    ['MiniMax-AI/fullstack-dev','Backend architecture with REST API design, auth flows, real-time features, and database integration','https://officialskills.sh/MiniMax-AI/skills/fullstack-dev'],
+    ['MiniMax-AI/android-native-dev','Android native development with Kotlin/Jetpack Compose, Material Design 3, and accessibility','https://officialskills.sh/MiniMax-AI/skills/android-native-dev'],
+    ['MiniMax-AI/ios-application-dev','iOS development with UIKit, SnapKit, and SwiftUI covering navigation, Dark Mode, and HIG compliance','https://officialskills.sh/MiniMax-AI/skills/ios-application-dev'],
+    ['MiniMax-AI/shader-dev','GLSL shader techniques for ray marching, fluid simulation, particle systems, and procedural generation','https://officialskills.sh/MiniMax-AI/skills/shader-dev'],
+    ['MiniMax-AI/gif-sticker-maker','Convert photos into animated GIF stickers in Funko Pop style via MiniMax API','https://officialskills.sh/MiniMax-AI/skills/gif-sticker-maker'],
+    ['MiniMax-AI/minimax-pdf','Generate, fill, and reformat PDFs with a token-based design system and 15 cover styles','https://officialskills.sh/MiniMax-AI/skills/minimax-pdf'],
+    ['MiniMax-AI/pptx-generator','Create and edit PowerPoint presentations from scratch with PptxGenJS','https://officialskills.sh/MiniMax-AI/skills/pptx-generator'],
+    ['MiniMax-AI/minimax-xlsx','Create, read, analyze, and validate Excel/spreadsheet files with zero format loss','https://officialskills.sh/MiniMax-AI/skills/minimax-xlsx'],
+    ['MiniMax-AI/minimax-docx','Professional DOCX document creation and editing using OpenXML SDK','https://officialskills.sh/MiniMax-AI/skills/minimax-docx'],
+  ]},
+
+  // ── MOBILE ─────────────────────────────────────────────────────────
+  {cat:'mobile', provider:'Expo', sub:'11 skills',
+   skills:[
+    ['expo/building-native-ui','Build apps with Expo Router, styling, components, navigation, and animations','https://officialskills.sh/expo/skills/building-native-ui'],
+    ['expo/expo-api-routes','Create API routes in Expo Router with EAS Hosting','https://officialskills.sh/expo/skills/expo-api-routes'],
+    ['expo/expo-cicd-workflows','CI/CD workflows for Expo projects','https://officialskills.sh/expo/skills/expo-cicd-workflows'],
+    ['expo/expo-deployment','Deploy Expo apps to production','https://officialskills.sh/expo/skills/expo-deployment'],
+    ['expo/expo-dev-client','Build and distribute Expo dev clients locally or via TestFlight','https://officialskills.sh/expo/skills/expo-dev-client'],
+    ['expo/expo-tailwind-setup','Set up Tailwind CSS v4 in Expo with NativeWind v5','https://officialskills.sh/expo/skills/expo-tailwind-setup'],
+    ['expo/expo-ui-jetpack-compose','Jetpack Compose UI components for Expo','https://officialskills.sh/expo/skills/expo-ui-jetpack-compose'],
+    ['expo/expo-ui-swift-ui','SwiftUI components for Expo','https://officialskills.sh/expo/skills/expo-ui-swift-ui'],
+    ['expo/native-data-fetching','Network requests, API calls, caching, and offline support','https://officialskills.sh/expo/skills/native-data-fetching'],
+    ['expo/upgrading-expo','Upgrade Expo SDK versions','https://officialskills.sh/expo/skills/upgrading-expo'],
+    ['expo/use-dom','Run web code in a webview on native using DOM components','https://officialskills.sh/expo/skills/use-dom'],
+  ]},
+  {cat:'mobile', provider:'CallStack (React Native)', sub:'3 skills',
+   skills:[
+    ['callstackincubator/react-native-best-practices','Performance optimization for React Native apps from Callstack','https://officialskills.sh/callstackincubator/skills/react-native-best-practices'],
+    ['callstackincubator/github','GitHub workflow patterns for PRs, code review, branching','https://officialskills.sh/callstackincubator/skills/github'],
+    ['callstackincubator/upgrading-react-native','React Native upgrade workflow: templates, dependencies, and common pitfalls','https://officialskills.sh/callstackincubator/skills/upgrading-react-native'],
+  ]},
+  {cat:'mobile', provider:'Flutter', sub:'3 skills',
+   skills:[
+    ['flutter/flutter-setting-up-on-linux','Set up a Linux machine for Flutter desktop development','https://officialskills.sh/flutter/skills/flutter-setting-up-on-linux'],
+    ['flutter/flutter-setting-up-on-macos','Set up a macOS machine for Flutter development','https://officialskills.sh/flutter/skills/flutter-setting-up-on-macos'],
+    ['flutter/flutter-setting-up-on-windows','Set up a Windows machine for Flutter development','https://officialskills.sh/flutter/skills/flutter-setting-up-on-windows'],
+  ]},
+
+  // ── SECURITY ───────────────────────────────────────────────────────
+  {cat:'security', provider:'Trail of Bits', sub:'21 skills',
+   skills:[
+    ['trailofbits/ask-questions-if-underspecified','Prompt for clarification on ambiguous requirements','https://officialskills.sh/trailofbits/skills/ask-questions-if-underspecified'],
+    ['trailofbits/audit-context-building','Deep architectural context via ultra-granular code analysis','https://officialskills.sh/trailofbits/skills/audit-context-building'],
+    ['trailofbits/building-secure-contracts','Smart contract security toolkit with vulnerability scanners for 6 blockchains','https://officialskills.sh/trailofbits/skills/building-secure-contracts'],
+    ['trailofbits/burpsuite-project-parser','Search and extract data from Burp Suite project files','https://officialskills.sh/trailofbits/skills/burpsuite-project-parser'],
+    ['trailofbits/claude-in-chrome-troubleshooting','Diagnose and fix Claude in Chrome MCP extension connectivity issues','https://officialskills.sh/trailofbits/skills/claude-in-chrome-troubleshooting'],
+    ['trailofbits/constant-time-analysis','Detect compiler-induced timing side-channels in crypto code','https://officialskills.sh/trailofbits/skills/constant-time-analysis'],
+    ['trailofbits/culture-index','Index and search culture documentation','https://officialskills.sh/trailofbits/skills/culture-index'],
+    ['trailofbits/differential-review','Security-focused diff review with git history analysis','https://officialskills.sh/trailofbits/skills/differential-review'],
+    ['trailofbits/dwarf-expert','DWARF debugging format expertise','https://officialskills.sh/trailofbits/skills/dwarf-expert'],
+    ['trailofbits/entry-point-analyzer','Identify state-changing entry points in smart contracts','https://officialskills.sh/trailofbits/skills/entry-point-analyzer'],
+    ['trailofbits/firebase-apk-scanner','Scan Android APKs for Firebase misconfigurations and security vulnerabilities','https://officialskills.sh/trailofbits/skills/firebase-apk-scanner'],
+    ['trailofbits/insecure-defaults','Detect insecure default configurations like hardcoded secrets, default credentials, and weak crypto','https://officialskills.sh/trailofbits/skills/insecure-defaults'],
+    ['trailofbits/modern-python','Modern Python tooling with uv, ruff, ty, and pytest best practices','https://officialskills.sh/trailofbits/skills/modern-python'],
+    ['trailofbits/property-based-testing','Property-based testing for multiple languages and smart contracts','https://officialskills.sh/trailofbits/skills/property-based-testing'],
+    ['trailofbits/semgrep-rule-creator','Create and refine Semgrep rules for vulnerability detection','https://officialskills.sh/trailofbits/skills/semgrep-rule-creator'],
+    ['trailofbits/semgrep-rule-variant-creator','Port existing Semgrep rules to new target languages with test-driven validation','https://officialskills.sh/trailofbits/skills/semgrep-rule-variant-creator'],
+    ['trailofbits/sharp-edges','Identify error-prone APIs and dangerous configurations','https://officialskills.sh/trailofbits/skills/sharp-edges'],
+    ['trailofbits/spec-to-code-compliance','Specification-to-code compliance checker for blockchain audits','https://officialskills.sh/trailofbits/skills/spec-to-code-compliance'],
+    ['trailofbits/static-analysis','Static analysis toolkit with CodeQL, Semgrep, and SARIF','https://officialskills.sh/trailofbits/skills/static-analysis'],
+    ['trailofbits/testing-handbook-skills','Testing Handbook skills: fuzzers, static analysis, sanitizers','https://officialskills.sh/trailofbits/skills/testing-handbook-skills'],
+    ['trailofbits/variant-analysis','Find similar vulnerabilities via pattern-based analysis','https://officialskills.sh/trailofbits/skills/variant-analysis'],
+  ]},
+  {cat:'security', provider:'Better Auth', sub:'7 skills',
+   skills:[
+    ['better-auth/best-practices','Best practices for Better Auth integration','https://officialskills.sh/better-auth/skills/best-practices'],
+    ['better-auth/explain-error','Explain Better Auth error messages','https://officialskills.sh/better-auth/skills/explain-error'],
+    ['better-auth/providers','Better Auth authentication providers','https://officialskills.sh/better-auth/skills/providers'],
+    ['better-auth/create-auth','Create authentication setup with Better Auth','https://officialskills.sh/better-auth/skills/create-auth'],
+    ['better-auth/emailAndPassword','Email and password authentication with Better Auth','https://officialskills.sh/better-auth/skills/emailAndPassword'],
+    ['better-auth/organization','Organization management with Better Auth','https://officialskills.sh/better-auth/skills/organization'],
+    ['better-auth/twoFactor','Two-factor authentication with Better Auth','https://officialskills.sh/better-auth/skills/twoFactor'],
+  ]},
+
+  // ── DATA ───────────────────────────────────────────────────────────
+  {cat:'data', provider:'Tinybird', sub:'4 skills',
+   skills:[
+    ['tinybirdco/tinybird-best-practices','Tinybird project guidelines for datasources, pipes, endpoints, and SQL','https://officialskills.sh/tinybirdco/skills/tinybird-best-practices'],
+    ['tinybirdco/tinybird-cli-guidelines','Tinybird CLI usage guidelines and commands','https://officialskills.sh/tinybirdco/skills/tinybird-cli-guidelines'],
+    ['tinybirdco/tinybird-python-sdk-guidelines','Tinybird Python SDK usage guidelines','https://officialskills.sh/tinybirdco/skills/tinybird-python-sdk-guidelines'],
+    ['tinybirdco/tinybird-typescript-sdk-guidelines','Tinybird TypeScript SDK usage guidelines','https://officialskills.sh/tinybirdco/skills/tinybird-typescript-sdk-guidelines'],
+  ]},
+  {cat:'data', provider:'ClickHouse', sub:'6 skills',
+   skills:[
+    ['clickhouse/clickhouse-best-practices','Best practices for working with ClickHouse','https://officialskills.sh/clickhouse/skills/clickhouse-best-practices'],
+    ['clickhouse/chdb-datastore','Drop-in pandas replacement with ClickHouse performance across 16+ data sources','https://officialskills.sh/clickhouse/skills/chdb-datastore'],
+    ['clickhouse/chdb-sql','In-process ClickHouse SQL engine for Python — query files, databases, and cloud storage without a server','https://officialskills.sh/clickhouse/skills/chdb-sql'],
+    ['clickhouse/clickhouse-architecture-advisor','Design ClickHouse architectures and translate best practices into workload-specific decisions','https://officialskills.sh/clickhouse/skills/clickhouse-architecture-advisor'],
+    ['clickhouse/clickhousectl-cloud-deploy','Deploy to ClickHouse Cloud and migrate from local setups with clickhousectl','https://officialskills.sh/clickhouse/skills/clickhousectl-cloud-deploy'],
+    ['clickhouse/clickhousectl-local-dev','Spin up a local ClickHouse development environment from zero with clickhousectl','https://officialskills.sh/clickhouse/skills/clickhousectl-local-dev'],
+  ]},
+  {cat:'data', provider:'Neon / Supabase / DuckDB', sub:'5 skills',
+   skills:[
+    ['neondatabase/neon-postgres','Best practices for Neon Serverless Postgres','https://officialskills.sh/neondatabase/skills/neon-postgres'],
+    ['neondatabase/claimable-postgres','Claimable Postgres database provisioning with Neon','https://officialskills.sh/neondatabase/skills/claimable-postgres'],
+    ['neondatabase/neon-postgres-egress-optimizer','Optimize Neon Postgres egress and data transfer','https://officialskills.sh/neondatabase/skills/neon-postgres-egress-optimizer'],
+    ['supabase/postgres-best-practices','PostgreSQL best practices for Supabase','https://officialskills.sh/supabase/skills/postgres-best-practices'],
+    ['duckdb/duckdb','In-process analytical SQL for files, databases, and cloud storage','https://officialskills.sh/duckdb/skills/duckdb'],
+  ]},
+
+  // ── MONITORING ─────────────────────────────────────────────────────
+  {cat:'monitoring', provider:'Sentry', sub:'27 skills (selection)',
+   skills:[
+    ['getsentry/sentry-sdk-setup','Set up Sentry in any language or framework — detects platform and routes to the right SDK','https://officialskills.sh/getsentry/skills/sentry-sdk-setup'],
+    ['getsentry/sentry-workflow','End-to-end Sentry workflow: fix production issues and review code with Sentry context','https://officialskills.sh/getsentry/skills/sentry-workflow'],
+    ['getsentry/sentry-fix-issues','Find and fix Sentry issues with stack trace, breadcrumb, and trace context via MCP','https://officialskills.sh/getsentry/skills/sentry-fix-issues'],
+    ['getsentry/sentry-code-review','Review code changes using Sentry issue and trace context','https://officialskills.sh/getsentry/skills/sentry-code-review'],
+    ['getsentry/sentry-pr-code-review','Review PR comments from Seer Bug Prediction and Sentry feedback','https://officialskills.sh/getsentry/skills/sentry-pr-code-review'],
+    ['getsentry/sentry-create-alert','Create Sentry alerts with email, Slack, PagerDuty, Discord, and more','https://officialskills.sh/getsentry/skills/sentry-create-alert'],
+    ['getsentry/sentry-setup-ai-monitoring','Instrument OpenAI, Anthropic, Vercel AI, LangChain, Google GenAI, and Pydantic AI','https://officialskills.sh/getsentry/skills/sentry-setup-ai-monitoring'],
+    ['getsentry/sentry-sdk-upgrade','Upgrade the Sentry JavaScript SDK across major versions','https://officialskills.sh/getsentry/skills/sentry-sdk-upgrade'],
+    ['getsentry/sentry-nextjs-sdk','Full Sentry SDK setup for Next.js 13+ (App Router and Pages Router)','https://officialskills.sh/getsentry/skills/sentry-nextjs-sdk'],
+    ['getsentry/sentry-python-sdk','Full Sentry SDK setup for Python (Django, Flask, FastAPI, Celery, Starlette)','https://officialskills.sh/getsentry/skills/sentry-python-sdk'],
+    ['getsentry/sentry-react-sdk','Full Sentry SDK setup for React (React Router v5-v7, TanStack Router, Redux)','https://officialskills.sh/getsentry/skills/sentry-react-sdk'],
+    ['getsentry/sentry-node-sdk','Full Sentry SDK setup for Node.js, Bun, and Deno','https://officialskills.sh/getsentry/skills/sentry-node-sdk'],
+    ['getsentry/sentry-go-sdk','Full Sentry SDK setup for Go (net/http, Gin, Echo, Fiber, FastHTTP)','https://officialskills.sh/getsentry/skills/sentry-go-sdk'],
+    ['getsentry/sentry-flutter-sdk','Full Sentry SDK setup for Flutter and Dart across all platforms','https://officialskills.sh/getsentry/skills/sentry-flutter-sdk'],
+    ['getsentry/sentry-android-sdk','Full Sentry SDK setup for Android (Kotlin and Java)','https://officialskills.sh/getsentry/skills/sentry-android-sdk'],
+    ['getsentry/sentry-cocoa-sdk','Full Sentry SDK setup for Apple platforms (iOS, macOS, tvOS, watchOS, visionOS)','https://officialskills.sh/getsentry/skills/sentry-cocoa-sdk'],
+    ['getsentry/sentry-ruby-sdk','Full Sentry SDK setup for Ruby (Rails, Sinatra, Rack, Sidekiq, Resque)','https://officialskills.sh/getsentry/skills/sentry-ruby-sdk'],
+    ['getsentry/sentry-php-sdk','Full Sentry SDK setup for PHP, Laravel, and Symfony','https://officialskills.sh/getsentry/skills/sentry-php-sdk'],
+    ['getsentry/sentry-dotnet-sdk','Full Sentry SDK setup for .NET (ASP.NET Core, MAUI, WPF, WinForms, Blazor)','https://officialskills.sh/getsentry/skills/sentry-dotnet-sdk'],
+  ]},
+  {cat:'monitoring', provider:'Datadog Labs', sub:'2 skills',
+   skills:[
+    ['datadog-labs/dd-apm','Query Datadog APM data directly from your editor','https://officialskills.sh/datadog-labs/skills/dd-apm'],
+    ['datadog-labs/dd-llmo-eval-bootstrap','Analyze production LLM traces and generate evaluators','https://officialskills.sh/datadog-labs/skills/dd-llmo-eval-bootstrap'],
+  ]},
+
+  // ── PAYMENTS ───────────────────────────────────────────────────────
+  {cat:'payments', provider:'Stripe / Coinbase', sub:'5 skills',
+   skills:[
+    ['stripe/stripe-best-practices','Best practices for building Stripe integrations','https://officialskills.sh/stripe/skills/stripe-best-practices'],
+    ['stripe/upgrade-stripe','Upgrade Stripe SDK and API versions','https://officialskills.sh/stripe/skills/upgrade-stripe'],
+    ['coinbase/wallet-operations','Wallet creation, management, and transaction signing','https://officialskills.sh/coinbase/skills/wallet-operations'],
+    ['coinbase/usdc-transfers','USDC stablecoin transfers on Base and other chains','https://officialskills.sh/coinbase/skills/usdc-transfers'],
+    ['coinbase/base-chain-trading','Trading and DeFi operations on Base chain','https://officialskills.sh/coinbase/skills/base-chain-trading'],
+  ]},
+
+  // ── WEB3 ───────────────────────────────────────────────────────────
+  {cat:'web3', provider:'Binance', sub:'7 skills',
+   skills:[
+    ['binance/crypto-market-rank','Query crypto market rankings including trending tokens, smart money inflows, meme rankings','https://officialskills.sh/binance/skills/crypto-market-rank'],
+    ['binance/meme-rush','Track real-time meme token lists from launchpads (Pump.fun, Four.meme) and AI-powered hot market topics','https://officialskills.sh/binance/skills/meme-rush'],
+    ['binance/query-address-info','Retrieve all token holdings and portfolio positions for any wallet address on BSC, Base, or Solana','https://officialskills.sh/binance/skills/query-address-info'],
+    ['binance/query-token-audit','Audit token security to detect scams, honeypots, and malicious contracts across BSC, Base, Solana, and Ethereum','https://officialskills.sh/binance/skills/query-token-audit'],
+    ['binance/query-token-info','Search tokens and fetch metadata, real-time market data, and K-Line candlestick charts','https://officialskills.sh/binance/skills/query-token-info'],
+    ['binance/trading-signal','Monitor on-chain Smart Money buy/sell signals with price, max gain, and exit rate data','https://officialskills.sh/binance/skills/trading-signal'],
+    ['binance/spot','Place and manage spot trading orders on Binance via API key authentication','https://officialskills.sh/binance/skills/spot'],
+  ]},
+
+  // ── PRODUCTIVITY ───────────────────────────────────────────────────
+  {cat:'productivity', provider:'Google Workspace CLI', sub:'17 skills',
+   skills:[
+    ['googleworkspace/gws-shared','Shared authentication, global flags, and output formatting','https://officialskills.sh/googleworkspace/skills/gws-shared'],
+    ['googleworkspace/gws-drive','Manage Google Drive files, folders, and shared drives','https://officialskills.sh/googleworkspace/skills/gws-drive'],
+    ['googleworkspace/gws-sheets','Read and write Google Sheets spreadsheets','https://officialskills.sh/googleworkspace/skills/gws-sheets'],
+    ['googleworkspace/gws-gmail','Send, read, and manage Gmail email','https://officialskills.sh/googleworkspace/skills/gws-gmail'],
+    ['googleworkspace/gws-calendar','Manage Google Calendar calendars and events','https://officialskills.sh/googleworkspace/skills/gws-calendar'],
+    ['googleworkspace/gws-admin-reports','Audit logs and usage reports for Workspace','https://officialskills.sh/googleworkspace/skills/gws-admin-reports'],
+    ['googleworkspace/gws-docs','Read and write Google Docs documents','https://officialskills.sh/googleworkspace/skills/gws-docs'],
+    ['googleworkspace/gws-slides','Read and write Google Slides presentations','https://officialskills.sh/googleworkspace/skills/gws-slides'],
+    ['googleworkspace/gws-tasks','Manage Google Tasks task lists and tasks','https://officialskills.sh/googleworkspace/skills/gws-tasks'],
+    ['googleworkspace/gws-people','Manage Google People contacts and profiles','https://officialskills.sh/googleworkspace/skills/gws-people'],
+    ['googleworkspace/gws-chat','Manage Google Chat spaces and messages','https://officialskills.sh/googleworkspace/skills/gws-chat'],
+    ['googleworkspace/gws-classroom','Manage Google Classroom classes, rosters, and coursework','https://officialskills.sh/googleworkspace/skills/gws-classroom'],
+    ['googleworkspace/gws-forms','Read and write Google Forms','https://officialskills.sh/googleworkspace/skills/gws-forms'],
+    ['googleworkspace/gws-keep','Manage Google Keep notes','https://officialskills.sh/googleworkspace/skills/gws-keep'],
+    ['googleworkspace/gws-events','Subscribe to Google Workspace events','https://officialskills.sh/googleworkspace/skills/gws-events'],
+    ['googleworkspace/gws-modelarmor','Filter user-generated content for safety','https://officialskills.sh/googleworkspace/skills/gws-modelarmor'],
+    ['googleworkspace/gws-workflow','Cross-service Google Workspace productivity workflows','https://officialskills.sh/googleworkspace/skills/gws-workflow'],
+  ]},
+  {cat:'productivity', provider:'Courier / Resend / Notion', sub:'3 skills',
+   skills:[
+    ['trycourier/courier-skills','Multi-channel notifications via email, SMS, push, and chat','https://github.com/trycourier/courier-skills'],
+    ['resend/resend','Transactional email sending with Resend API','https://officialskills.sh/resend/skills/resend'],
+    ['notion/notion','Knowledge management, database, and workspace integration','https://officialskills.sh/notion/skills/notion'],
+  ]},
+
+  // ── CLOUD ──────────────────────────────────────────────────────────
+  {cat:'cloud', provider:'Microsoft Azure', sub:'Core + 133 SDK skills',
+   skills:[
+    ['microsoft/cloud-solution-architect','Design well-architected Azure cloud systems','https://officialskills.sh/microsoft/skills/cloud-solution-architect'],
+    ['microsoft/continual-learning','Continual learning patterns for Azure AI','https://officialskills.sh/microsoft/skills/continual-learning'],
+    ['microsoft/copilot-sdk','Build applications powered by GitHub Copilot SDK','https://officialskills.sh/microsoft/skills/copilot-sdk'],
+    ['microsoft/entra-agent-id','Microsoft Entra Agent ID OAuth2 identities via Graph API','https://officialskills.sh/microsoft/skills/entra-agent-id'],
+    ['microsoft/frontend-design-review','Review and create distinctive frontend interfaces','https://officialskills.sh/microsoft/skills/frontend-design-review'],
+    ['microsoft/github-issue-creator','Structured GitHub issue reports from notes','https://officialskills.sh/microsoft/skills/github-issue-creator'],
+    ['microsoft/mcp-builder','MCP server creation guide for LLM tool integration','https://officialskills.sh/microsoft/skills/mcp-builder'],
+    ['microsoft/podcast-generation','AI podcast audio with Azure OpenAI Realtime API','https://officialskills.sh/microsoft/skills/podcast-generation'],
+    ['microsoft/skill-creator','Guide for creating effective skills for AI coding agents','https://officialskills.sh/microsoft/skills/skill-creator'],
+    ['microsoft/azure-ai-openai-dotnet','GPT-4, embeddings, DALL-E, and Whisper client for .NET','https://officialskills.sh/microsoft/skills/azure-ai-openai-dotnet'],
+    ['microsoft/azure-ai-projects-py','AI Foundry project client and agents (Python)','https://officialskills.sh/microsoft/skills/azure-ai-projects-py'],
+    ['microsoft/azure-identity-py','Microsoft Entra ID authentication (Python)','https://officialskills.sh/microsoft/skills/azure-identity-py'],
+    ['microsoft/azure-storage-blob-java','Blob storage for file management (Java)','https://officialskills.sh/microsoft/skills/azure-storage-blob-java'],
+    ['microsoft/azure-eventhub-dotnet','High-throughput event streaming (.NET)','https://officialskills.sh/microsoft/skills/azure-eventhub-dotnet'],
+    ['microsoft/azure-cosmos-py','Cosmos DB NoSQL client library (Python)','https://officialskills.sh/microsoft/skills/azure-cosmos-py'],
+    ['microsoft/m365-agents-dotnet','M365, Teams, and Copilot Studio agents (.NET)','https://officialskills.sh/microsoft/skills/m365-agents-dotnet'],
+    ['microsoft/azure-ai-contentsafety-py','Harmful content detection (Python)','https://officialskills.sh/microsoft/skills/azure-ai-contentsafety-py'],
+    ['microsoft/azure-search-documents-dotnet','Full-text, vector, and hybrid search (.NET)','https://officialskills.sh/microsoft/skills/azure-search-documents-dotnet'],
+    ['microsoft/azure-security-keyvault-keys-dotnet','Cryptographic key management (.NET)','https://officialskills.sh/microsoft/skills/azure-security-keyvault-keys-dotnet'],
+    ['microsoft/azure-ai-voicelive-py','Real-time bidirectional voice AI (Python)','https://officialskills.sh/microsoft/skills/azure-ai-voicelive-py'],
+  ]},
+];
+
+// ── CATEGORY METADATA ────────────────────────────────────────────────
+const CATS = {
+  pm:          { label: 'Product Management', color: '#6366f1' },
+  marketing:   { label: 'Marketing & Advertising', color: '#f59e0b' },
+  design:      { label: 'Design & Creative', color: '#ec4899' },
+  frontend:    { label: 'Frontend & Web', color: '#06b6d4' },
+  backend:     { label: 'Backend & Infrastructure', color: '#10b981' },
+  ai:          { label: 'AI & Machine Learning', color: '#8b5cf6' },
+  mobile:      { label: 'Mobile Development', color: '#f97316' },
+  security:    { label: 'Auth & Security', color: '#ef4444' },
+  data:        { label: 'Data & Databases', color: '#14b8a6' },
+  monitoring:  { label: 'Monitoring & Observability', color: '#3b82f6' },
+  payments:    { label: 'Payments & Commerce', color: '#22c55e' },
+  web3:        { label: 'Web3 & Crypto', color: '#a855f7' },
+  productivity:{ label: 'Productivity & Collaboration', color: '#64748b' },
+  cloud:       { label: 'Cloud Platforms', color: '#0ea5e9' },
+};
+
+// ── RENDER ────────────────────────────────────────────────────────────
+function render(filter = 'all', query = '') {
+  const main = document.getElementById('main');
+  const q = query.toLowerCase().trim();
+
+  // Group data by category in order
+  const catOrder = Object.keys(CATS);
+  const grouped = {};
+  DATA.forEach(group => {
+    if (!grouped[group.cat]) grouped[group.cat] = [];
+    grouped[group.cat].push(group);
+  });
+
+  let html = '';
+  let totalVisible = 0;
+
+  catOrder.forEach(cat => {
+    if (filter !== 'all' && filter !== cat) return;
+    if (!grouped[cat]) return;
+
+    const catMeta = CATS[cat];
+    let catHtml = '';
+    let catCount = 0;
+
+    grouped[cat].forEach(group => {
+      const matchedSkills = group.skills.filter(([name, desc]) => {
+        if (!q) return true;
+        return name.toLowerCase().includes(q) || desc.toLowerCase().includes(q) || group.provider.toLowerCase().includes(q);
+      });
+      if (!matchedSkills.length) return;
+      catCount += matchedSkills.length;
+
+      const cardsHtml = matchedSkills.map(([name, desc, url]) => `
+        <a class="skill-card" href="${url}" target="_blank" rel="noopener">
+          <div class="skill-name">
+            <span class="cat-tag" style="background:${catMeta.color}"></span>
+            ${name}
+          </div>
+          <div class="skill-desc">${desc}</div>
+        </a>`).join('');
+
+      catHtml += `
+        <div class="provider-group">
+          <div class="provider-label"><span>${group.provider}</span>${group.sub ? ' · ' + group.sub : ''}</div>
+          <div class="skills-grid">${cardsHtml}</div>
+        </div>`;
+    });
+
+    if (!catCount) return;
+    totalVisible += catCount;
+
+    const isPm = cat === 'pm';
+    html += `
+      <div class="category-section" data-cat="${cat}">
+        <div class="cat-header">
+          <div class="cat-dot" style="background:${catMeta.color}"></div>
+          <div class="cat-title">${catMeta.label}</div>
+          <div class="cat-count">${catCount} skills</div>
+        </div>
+        ${catHtml}
+      </div>`;
+  });
+
+  if (!totalVisible) {
+    html = `<div class="no-results"><svg width="48" height="48" fill="none" stroke="#6b7280" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>No skills matched "<strong>${query}</strong>"</p></div>`;
+  }
+
+  main.innerHTML = html;
+}
+
+// ── CONTROLS ──────────────────────────────────────────────────────────
+let activeFilter = 'all';
+let searchQuery = '';
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    activeFilter = tab.dataset.cat;
+    render(activeFilter, searchQuery);
+  });
+});
+
+let searchTimer;
+document.getElementById('search').addEventListener('input', e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    searchQuery = e.target.value;
+    render(activeFilter, searchQuery);
+  }, 150);
+});
+
+render();
+</script>
+</body>
+</html>
