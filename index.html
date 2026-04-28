@@ -1466,29 +1466,48 @@ async function fetchSkillDetails(url, skillName) {
   }
 
   try {
-    // Try to fetch README or SKILL.md
-    let readmeUrl = url;
-    
+    let readmeUrl = '';
+
     // Handle different URL formats
     if (url.includes('officialskills.sh')) {
-      readmeUrl = url + '/README.md';
-    } else if (url.includes('github.com') && url.includes('/tree/')) {
-      readmeUrl = url.replace('/tree/', '/raw/') + '/SKILL.md';
+      // officialskills.sh doesn't expose raw markdown, show link instead
+      return {
+        install: '',
+        usage: '',
+        summary: `查看完整文档: <a href="${url}" target="_blank" rel="noopener">${url}</a>`
+      };
     } else if (url.includes('github.com')) {
-      readmeUrl = url + '/raw/main/SKILL.md';
+      // Convert GitHub URL to raw.githubusercontent.com format
+      // From: https://github.com/owner/repo/tree/branch/path
+      // To: https://raw.githubusercontent.com/owner/repo/branch/path/SKILL.md
+      const match = url.match(/github\.com\/([^\/]+)\/([^\/]+)(?:\/tree\/([^\/]+))?(.*)$/);
+      if (match) {
+        const [, owner, repo, branch = 'main', path = ''] = match;
+        readmeUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}${path}/SKILL.md`;
+      }
     }
+
+    if (!readmeUrl) throw new Error('Invalid URL format');
 
     const response = await fetch(readmeUrl);
     if (!response.ok) {
-      // Try alternative paths
-      if (readmeUrl.includes('/raw/main/')) {
-        readmeUrl = readmeUrl.replace('/raw/main/', '/raw/master/');
-        const altResponse = await fetch(readmeUrl);
-        if (!altResponse.ok) throw new Error('Failed to fetch');
-        const text = await altResponse.text();
-        return parseSkillMarkdown(text);
+      // Try README.md as fallback
+      const readmeFallback = readmeUrl.replace('/SKILL.md', '/README.md');
+      const altResponse = await fetch(readmeFallback);
+      if (!altResponse.ok) {
+        // Try master branch
+        const masterUrl = readmeUrl.replace('/main/', '/master/');
+        const masterResponse = await fetch(masterUrl);
+        if (!masterResponse.ok) throw new Error('Failed to fetch');
+        const text = await masterResponse.text();
+        const parsed = parseSkillMarkdown(text);
+        skillDetailsCache.set(url, parsed);
+        return parsed;
       }
-      throw new Error('Failed to fetch');
+      const text = await altResponse.text();
+      const parsed = parseSkillMarkdown(text);
+      skillDetailsCache.set(url, parsed);
+      return parsed;
     }
 
     const text = await response.text();
@@ -1497,9 +1516,9 @@ async function fetchSkillDetails(url, skillName) {
     return parsed;
   } catch (error) {
     return {
-      install: '无法加载安装说明',
-      usage: '无法加载使用说明',
-      summary: '无法加载简介'
+      install: '',
+      usage: '',
+      summary: `无法加载详情。<a href="${url}" target="_blank" rel="noopener">查看原始链接</a>`
     };
   }
 }
